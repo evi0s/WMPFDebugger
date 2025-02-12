@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["es2020", "ES2021.String"],
+    "moduleResolution": "Node",
+    "noEmit": true,
+    "esModuleInterop": true,
+    "allowJs": false,
+    "strict": true
+  },
+  "exclude": ["node_modules/*", "src/third-party/*"]
+}
