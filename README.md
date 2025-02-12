@@ -1,5 +1,7 @@
 # WMPFDebugger
 
+[English](README.md) | [中文](README.zh.md)
+
 Yet another WeChat miniapp debugger on Windows (WMPF).
 
 This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools and patches serval restrictions to force miniapp runtime to support full Chrome Debug Protocol, and thus can be directly applied to standard devtools shipped with chromium-based browsers.
@@ -7,7 +9,7 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 ## Support Status
 
-Note: Only miniapp component is supported.
+Note: Currently only miniapp component is supported.
 
 Version histories:
 
@@ -15,7 +17,7 @@ Version histories:
 
 To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`.
 
-To adapt to another version, find x-refs mentioned in `frida/hook.js` in IDA Pro to locate function offsets.
+To adapt to another version, find x-refs mentioned in `frida/hook.js` in IDA Pro to locate function offsets. Alternatively, you can submit an issue for new version adaption and I will try that if I have the binary. Note that only newer version adaption requests will be considered.
 
 
 ## Prerequisites
@@ -52,7 +54,7 @@ npx ts-node src/index.ts
 
 ![Sources in DevTools](screenshots/sources.png)
 
-## LICENSE
+## Disclaimer
 
 BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
 
