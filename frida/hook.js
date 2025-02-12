@@ -6,6 +6,7 @@ const getMainModule = () => {
 
 
 const patchResourceCachePolicy = (base, offset) => {
+    // xref: WAPCAdapterAppIndex.js
     Interceptor.attach(base.add(offset), {
         onEnter(args) {
             console.log(`[patch] lib cache policy ${offset} on enter`);
