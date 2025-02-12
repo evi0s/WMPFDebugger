@@ -137,14 +137,19 @@ const frida_server = async () => {
     // find hook script
     const projectRoot = path.join(path.dirname(require.main && require.main.filename || process.mainModule && process.mainModule.filename || process.cwd()), "..");
     let scriptContent: string | null = null;
-    let configContent: string | null = null;
     try {
         scriptContent = (await promises.readFile(path.join(projectRoot, "frida/hook.js"))).toString();
-        configContent = (await promises.readFile(path.join(projectRoot, "frida/config", `addresses.${wmpfVersion}.json`))).toString();
-        configContent = JSON.stringify(JSON.parse(configContent));
     } catch (e) {
         throw new Error("[frida] hook script not found");
         return;
+    }
+
+    let configContent: string | null = null;
+    try {
+        configContent = (await promises.readFile(path.join(projectRoot, "frida/config", `addresses.${wmpfVersion}.json`))).toString();
+        configContent = JSON.stringify(JSON.parse(configContent));
+    } catch(e) {
+        throw new Error(`[frida] version config not found: ${wmpfVersion}`);
     }
 
     if (scriptContent === null || configContent === null) {
