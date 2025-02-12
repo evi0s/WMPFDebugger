@@ -14,7 +14,7 @@ Note: Currently only miniapp component is supported.
 Version histories:
 
 * 11633 (latest)
-* 11581
+* 11581 (unstable, will connect but crash renderer)
 
 To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`.
 
