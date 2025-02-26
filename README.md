@@ -13,7 +13,8 @@ Note: Currently only miniapp component is supported.
 
 Version histories:
 
-* 13331 (latest)
+* 13341 (latest)
+* 13331
 * 11633
 * 11581 (unstable, will connect but crash renderer, feel free to test)
 

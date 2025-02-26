@@ -41,8 +41,11 @@ const patchCDPFilter = (base, offset, version) => {
 
 const onLoadStartHook = (a1, a2, version) => {
     let structOffset = [1208, 1160, 16, 488];
-    if (version === 13331) {
-        structOffset = [1272, 1224, 16, 488];
+    switch (version) {
+        case 11331:
+        case 13341:
+            structOffset = [1272, 1224, 16, 488];
+            break;
     }
     const passArgs = a1.add(56).readPointer().add(structOffset[0]).readPointer();
     const passConditionPtr = passArgs.add(8).readPointer().add(structOffset[1]).readPointer().add(structOffset[2]).readPointer().add(structOffset[3]);
@@ -83,10 +86,10 @@ const parseConfig = () => {
     if (rawConfig.includes("@@")) {
         // test addresses
         return {
-            Version: 13331,
-            LoadStartHookOffset: "0x0FFC200",
-            CDPFilterHookOffset: "0x2420100",
-            ResourceCachePolicyHookOffset: "0x1050590"
+            Version: 13341,
+            LoadStartHookOffset: "0x10009E0",
+            CDPFilterHookOffset: "0x242E8E0",
+            ResourceCachePolicyHookOffset: "0x1053730"
         }
     }
     return JSON.parse(rawConfig);
