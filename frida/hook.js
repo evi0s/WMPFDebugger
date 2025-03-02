@@ -49,8 +49,14 @@ const onLoadStartHook = (a1, a2, version) => {
     }
     const passArgs = a1.add(56).readPointer().add(structOffset[0]).readPointer();
     const passConditionPtr = passArgs.add(8).readPointer().add(structOffset[1]).readPointer().add(structOffset[2]).readPointer().add(structOffset[3]);
-    VERBOSE && console.log("[hook] scene:", passConditionPtr.readInt());
-    const sceneNumberArray = [1256, 1005, 1145];
+    console.log("[hook] scene:", passConditionPtr.readInt());
+    
+    // 1145: from search
+    // 1256: from recent
+    // 1260: from frequently used
+    // 1302: from services
+    // 1308: minigame?
+    const sceneNumberArray = [1005, 1145, 1256, 1260, 1302, 1308];
     if (!sceneNumberArray.includes(passConditionPtr.readInt())) {
         return;
     }
