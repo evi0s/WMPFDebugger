@@ -50,7 +50,7 @@ const onLoadStartHook = (a1, a2, version) => {
     const passArgs = a1.add(56).readPointer().add(structOffset[0]).readPointer();
     const passConditionPtr = passArgs.add(8).readPointer().add(structOffset[1]).readPointer().add(structOffset[2]).readPointer().add(structOffset[3]);
     VERBOSE && console.log("[hook] scene:", passConditionPtr.readInt());
-    const sceneNumberArray = [1256];
+    const sceneNumberArray = [1256, 1005, 1145];
     if (!sceneNumberArray.includes(passConditionPtr.readInt())) {
         return;
     }
