@@ -42,7 +42,7 @@ const patchCDPFilter = (base, offset, version) => {
 const onLoadStartHook = (a1, a2, version) => {
     let structOffset = [1208, 1160, 16, 488];
     switch (version) {
-        case 11331:
+        case 13331:
         case 13341:
             structOffset = [1272, 1224, 16, 488];
             break;
