@@ -13,7 +13,8 @@ Note: Currently only miniapp component is supported.
 
 Version histories:
 
-* 13341 (latest)
+* 13487 (latest)
+* 13341
 * 13331
 * 11633
 * 11581 (unstable, will connect but crash renderer, feel free to test)
@@ -22,6 +23,8 @@ To check your installed version, navigate to Task Manager -> WeChatAppEx -> Righ
 
 To adapt to another version, find x-refs mentioned in `frida/hook.js` in IDA Pro to locate function offsets. Alternatively, you can submit an issue for new version adaption and I will try that if I have the binary. Note that only newer version adaption requests will be considered.
 
+
+To upgrade to the latest WMPF (non-beta WeChat only), type in `:showcmdwnd` in the search bar (do not hit enter), then the command window should pop up. Type in `/plugin set_grayvalue=202&check_update_force` and hit enter, the latest WMPF plugin should be downloaded, if any updates are available. Restart the WeChat to apply plugin upgrade.
 
 ## Prerequisites
 
