@@ -49,7 +49,7 @@ const onLoadStartHook = (a1, a2, version) => {
             structOffset = [1272, 1224, 16, 488];
             break;
         case 13655:
-            structOffset = [1272, 1232, 16, 488];
+            structOffset = [1280, 1232, 16, 488];
             break;
     }
     const passArgs = a1.add(56).readPointer().add(structOffset[0]).readPointer();
