@@ -61,7 +61,7 @@ const onLoadStartHook = (a1, a2, version) => {
     // 1260: from frequently used
     // 1302: from services
     // 1308: minigame?
-    const sceneNumberArray = [1005, 1145, 1256, 1260, 1302, 1308];
+    const sceneNumberArray = [1005, 1053, 1145, 1256, 1260, 1302, 1308];
     if (!sceneNumberArray.includes(passConditionPtr.readInt())) {
         return;
     }
