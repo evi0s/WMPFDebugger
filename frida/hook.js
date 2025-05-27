@@ -51,11 +51,15 @@ const onLoadStartHook = (a1, a2, version) => {
         case 13655:
             structOffset = [1280, 1232, 16, 488];
             break;
+        case 13871:
+            structOffset = [1360, 1312, 16, 488];
+            break;
     }
     const passArgs = a1.add(56).readPointer().add(structOffset[0]).readPointer();
     const passConditionPtr = passArgs.add(8).readPointer().add(structOffset[1]).readPointer().add(structOffset[2]).readPointer().add(structOffset[3]);
     console.log("[hook] scene:", passConditionPtr.readInt());
 
+    // 1053: from issue #25
     // 1145: from search
     // 1256: from recent
     // 1260: from frequently used
