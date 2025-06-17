@@ -52,6 +52,7 @@ const onLoadStartHook = (a1, a2, version) => {
             structOffset = [1280, 1232, 16, 488];
             break;
         case 13871:
+        case 13909:
             structOffset = [1360, 1312, 16, 488];
             break;
     }
