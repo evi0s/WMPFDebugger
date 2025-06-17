@@ -61,12 +61,13 @@ const onLoadStartHook = (a1, a2, version) => {
     console.log("[hook] scene:", passConditionPtr.readInt());
 
     // 1053: from issue #25
+    // 1074: from issue #32
     // 1145: from search
     // 1256: from recent
     // 1260: from frequently used
     // 1302: from services
     // 1308: minigame?
-    const sceneNumberArray = [1005, 1053, 1145, 1256, 1260, 1302, 1308];
+    const sceneNumberArray = [1005, 1053, 1074, 1145, 1256, 1260, 1302, 1308];
     if (!sceneNumberArray.includes(passConditionPtr.readInt())) {
         return;
     }
