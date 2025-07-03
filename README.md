@@ -17,6 +17,11 @@ Version histories:
 * 14161
 * 13909
 * 13871
+
+<details>
+
+<summary>Older histories</summary>
+
 * 13655
 * 13639
 * 13487
@@ -24,6 +29,9 @@ Version histories:
 * 13331
 * 11633
 * 11581 (unstable, will connect but crash renderer, feel free to test)
+
+</details>
+
 
 To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`.
 
