@@ -1,0 +1,6 @@
+{
+    "Version": 14199,
+    "LoadStartHookOffset": "0x10246F0",
+    "CDPFilterHookOffset": "0x24839E0",
+    "ResourceCachePolicyHookOffset": "0x107ABB0"
+}
