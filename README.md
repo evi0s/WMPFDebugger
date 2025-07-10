@@ -35,7 +35,7 @@ Version histories:
 
 To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`.
 
-To adapt to another version, find x-refs mentioned in `frida/hook.js` in IDA Pro to locate function offsets. Alternatively, you can submit an issue for new version adaption and I will try that if I have the binary. Note that only newer version adaption requests will be considered.
+To adapt to another version, please find the instructions in [ADAPTATION.md](ADAPTATION.md). Alternatively, you can submit an issue for new version adaption and I will try that if I have the binary. Note that only newer version adaption requests will be considered.
 
 
 To upgrade to the latest WMPF (WeChat version < 4.x), type in `:showcmdwnd` in the search bar (do not hit enter), then the command window should pop up. Type in `/plugin set_grayvalue=202&check_update_force` and hit enter, the latest WMPF plugin should be downloaded, if any updates are available. Restart the WeChat to apply plugin upgrade.
