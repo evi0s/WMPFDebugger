@@ -42,7 +42,7 @@ To upgrade to the latest WMPF (WeChat version < 4.x), type in `:showcmdwnd` in t
 
 ## Prerequisites
 
-* node.js
+* node.js (tested on LTS v22)
     - yarn
 * chromium-based browsers (e.g., Chrome, Edge, etc.)
 

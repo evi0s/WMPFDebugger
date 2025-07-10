@@ -39,7 +39,7 @@
 
 ## 准备
 
-* node.js
+* node.js (已在 LTS v22 上测试)
     - yarn 包管理器
 * 基于的 chromium 浏览器，例如 Chrome, Edge, 等等
 
