@@ -20,7 +20,7 @@ Version histories:
 
 <details>
 
-<summary>Older histories</summary>
+<summary>Older versions</summary>
 
 * 13655
 * 13639

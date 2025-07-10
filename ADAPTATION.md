@@ -31,7 +31,7 @@ strings.
 
 ![CDPFilterHook.1](./screenshots/adaptation/cdp_filter_hook.1.png)
 
-Hit `x`, go to the only function that x-refed this string.
+Hit `x`, go to the only function that references this string.
 
 ![CDPFilterHook.2](./screenshots/adaptation/cdp_filter_hook.2.png)
 
@@ -42,7 +42,7 @@ function called in the x-refed function `sub_181DB82D0`.
 
 ## ResourceCachePolicyHookOffset
 
-Not sure if this function affect the sources shown in the
+Not sure if this function affects the sources shown in the
 devtools, keep hooking this just in case.
 
 Locate the resource cache policy function by searching
