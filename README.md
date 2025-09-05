@@ -13,15 +13,19 @@ Note: Currently only miniapp component is supported.
 
 Version histories:
 
-* 14199 (latest)
-* 14161
-* 13909
-* 13871
+* 16389 (latest, credit @liding58)
+* 16203 (credit @liding58)
+* 16133 (credit @liding58)
+* 14315 (credit @liding58)
+* 14199
 
 <details>
 
 <summary>Older versions</summary>
 
+* 14161
+* 13909
+* 13871
 * 13655
 * 13639
 * 13487
