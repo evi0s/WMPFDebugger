@@ -13,7 +13,8 @@ Note: Currently only miniapp component is supported.
 
 Version histories:
 
-* 16389 (latest, credit @liding58)
+* 16467 (latest, credit @51-xinyu)
+* 16389 (credit @liding58)
 * 16203 (credit @liding58)
 * 16133 (credit @liding58)
 * 14315 (credit @liding58)
