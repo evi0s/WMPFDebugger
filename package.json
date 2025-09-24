@@ -2,17 +2,17 @@
   "name": "WMPFDebugger",
   "version": "1.0.0",
   "main": "src/index.ts",
-  "license": "MIT",
+  "license": "GPL-2.0-only",
   "author": "evi0s",
   "dependencies": {
-    "frida": "^16.6.6",
-    "protobufjs": "^7.4.0",
-    "ws": "^8.18.0"
+    "frida": "^17.3.2",
+    "protobufjs": "^7.5.4",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@types/node": "^22.13.1",
-    "@types/ws": "^8.5.14",
+    "@types/node": "^24.5.2",
+    "@types/ws": "^8.18.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.9.2"
   }
 }

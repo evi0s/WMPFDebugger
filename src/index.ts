@@ -124,7 +124,8 @@ const frida_server = async () => {
         return;
     }
     const wmpfProcess = processes.filter(process => process.pid === wmpfPid)[0];
-    const wmpfVersionMatch = wmpfProcess.parameters.path ? wmpfProcess.parameters.path.match(/\d+/g) : "";
+    const wmpfProcessPath = wmpfProcess.parameters.path as string | undefined;
+    const wmpfVersionMatch = wmpfProcessPath ? wmpfProcessPath.match(/\d+/g) : "";
     const wmpfVersion = wmpfVersionMatch ? new Number(wmpfVersionMatch.pop()) : 0;
     if (wmpfVersion === 0) {
         throw new Error("[frida] error in find wmpf version");
@@ -132,7 +133,7 @@ const frida_server = async () => {
     }
 
     // attach to process
-    const session = await localDevice.attach(wmpfPid);
+    const session = await localDevice.attach(Number(wmpfPid));
 
     // find hook script
     const projectRoot = path.join(path.dirname(require.main && require.main.filename || process.mainModule && process.mainModule.filename || process.cwd()), "..");
