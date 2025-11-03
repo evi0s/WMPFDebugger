@@ -9,7 +9,6 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 ## Support Status
 
-Note: Currently only miniapp component is supported.
 
 Version histories:
 
@@ -39,6 +38,7 @@ Version histories:
 
 </details>
 
+To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EXTENSION.md). Note that this feature has many limitations currently and is simply a basic workaround.
 
 To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`.
 
