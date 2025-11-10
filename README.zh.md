@@ -9,17 +9,18 @@
 
 支持的 WMPF 版本：
 
-* 16815 (最新)
+* 16965 (最新)
+* 16815
 * 16771
 * 16467 (credit @51-xinyu)
 * 16389 (credit @liding58)
 * 16203 (credit @liding58)
-* 16133 (credit @liding58)
 
 <details>
 
 <summary>更早版本</summary>
 
+* 16133 (credit @liding58)
 * 14315 (credit @liding58)
 * 14199
 * 14161
