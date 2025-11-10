@@ -42,6 +42,8 @@
 
 如何适配到其他版本：参见 [ADAPTATION.md](ADAPTATION.md)。另外，你也可以提交版本适配的 Issue，我会尝试适配该版本如果我有相应的版本的 binary。仅更新版本的适配请求会被考虑
 
+如何更新到最新的 WMPF 版本（微信版本 > 4.x）：官网 `pc.weixin.qq.com` 下载最新版微信。最新版 WMPF 会随新版安装包被一同安装。
+
 如何更新到最新的 WMPF 版本（微信版本 < 4.x）：搜索框输入 `:showcmdwnd`（不要按回车触发搜索）弹出命令窗口，输入 `/plugin set_grayvalue=202&check_update_force` 并回车等待更新（如果有新版本）。重启微信以生效。
 
 
