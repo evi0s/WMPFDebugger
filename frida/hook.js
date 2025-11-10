@@ -71,6 +71,7 @@ const onLoadStartHook = (a1, a2, version) => {
     const passConditionPtr = passArgs.add(8).readPointer().add(structOffset[1]).readPointer().add(structOffset[2]).readPointer().add(structOffset[3]);
     console.log("[hook] scene:", passConditionPtr.readInt());
 
+    // 1000: from issue #83
     // 1007: from issue #80
     // 1008: from issue #53
     // 1027: from issue #78
@@ -82,7 +83,7 @@ const onLoadStartHook = (a1, a2, version) => {
     // 1260: from frequently used
     // 1302: from services
     // 1308: minigame?
-    const sceneNumberArray = [1005, 1007, 1008, 1027, 1035, 1053, 1074, 1145, 1256, 1260, 1302, 1308];
+    const sceneNumberArray = [1000, 1005, 1007, 1008, 1027, 1035, 1053, 1074, 1145, 1256, 1260, 1302, 1308];
     if (!sceneNumberArray.includes(passConditionPtr.readInt())) {
         return;
     }
