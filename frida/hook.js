@@ -76,6 +76,9 @@ const onLoadStartHook = (a1, a2, version) => {
         case 18151:
             structOffset = [1416, 1352, 16, 488];
             break;
+        case 18787:
+            structOffset = [1408, 1344, 16, 488];
+            break;
     }
     const passArgs = a1.add(56).readPointer().add(structOffset[0]).readPointer();
     const passConditionPtr = passArgs.add(8).readPointer().add(structOffset[1]).readPointer().add(structOffset[2]).readPointer().add(structOffset[3]);
