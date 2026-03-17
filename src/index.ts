@@ -31,7 +31,7 @@ const debug_server = (options: CliOptions, logger: Logger) => {
 
     const onMessage = (message: ArrayBuffer) => {
         logger.main_debug(
-            `[client] received raw message (hex): ${bufferToHexString(message)}`,
+            `[miniapp] client received raw message (hex): ${bufferToHexString(message)}`,
         );
         let unwrappedData: any = null;
         try {
@@ -40,10 +40,10 @@ const debug_server = (options: CliOptions, logger: Logger) => {
                     message,
                 );
             unwrappedData = codex.unwrapDebugMessageData(decodedData);
-            logger.main_debug(`[client] [DEBUG] decoded data:`);
+            logger.main_debug(`[miniapp] [DEBUG] decoded data:`);
             logger.main_debug(unwrappedData);
         } catch (e) {
-            logger.error(`[client] err: ${e}`);
+            logger.error(`[miniapp] client err: ${e}`);
         }
 
         if (unwrappedData === null) {
@@ -57,13 +57,13 @@ const debug_server = (options: CliOptions, logger: Logger) => {
     };
 
     wss.on("connection", (ws: WebSocket) => {
-        logger.info("[conn] miniapp client connected");
+        logger.info("[miniapp] miniapp client connected");
         ws.on("message", onMessage);
         ws.on("error", (err) => {
-            logger.error("[client] err:", err);
+            logger.error("[miniapp] client err:", err);
         });
         ws.on("close", () => {
-            logger.info("[client] client disconnected");
+            logger.info("[miniapp] client disconnected");
         });
     });
 
@@ -115,13 +115,13 @@ const proxy_server = (options: CliOptions, logger: Logger) => {
     };
 
     wss.on("connection", (ws: WebSocket) => {
-        logger.info("[conn] CDP client connected");
+        logger.info("[cdp] CDP client connected");
         ws.on("message", onMessage);
         ws.on("error", (err) => {
-            logger.error("[client] CDP err:", err);
+            logger.error("[cdp] CDP client err:", err);
         });
         ws.on("close", () => {
-            logger.info("[client] CDP client disconnected");
+            logger.info("[cdp] CDP client disconnected");
         });
     });
 
@@ -234,6 +234,7 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
     logger.info(
         `[frida] script loaded, WMPF version: ${wmpfVersion}, pid: ${wmpfPid}`,
     );
+    logger.info(`[frida] you can now open any miniapps`);
 };
 
 const main = async () => {
