@@ -48,7 +48,7 @@ const hookOnLoadScene = (a1, sceneOffsets) => {
         .add(16)
         .readPointer()
         .add(488);
-    send("[hook] scene:", miniappScenePtr.readInt());
+    send(`[hook] scene: ${miniappScenePtr.readInt()}`);
 
     // 1000: from issue #83 <-- will crash the process
     // 1007: from issue #80
