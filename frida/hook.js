@@ -1,93 +1,54 @@
-const VERBOSE = false;
-
 const getMainModule = (version) => {
     if (version >= 13331) {
         return Process.findModuleByName("flue.dll");
     }
     return Process.findModuleByName("WeChatAppEx.exe");
-}
+};
 
-
-const patchResourceCachePolicy = (base, offset, version) => {
-    // xref: WAPCAdapterAppIndex.js
-    Interceptor.attach(base.add(offset), {
-        onEnter(args) {
-            console.log(`[patch] lib cache policy ${offset} on enter`);
-        },
-        onLeave(retval) {
-            console.log(`[patch] lib cache policy ${offset} onLeave with retval:`, retval.toInt32(), "; patch to 0x0");
-            retval.replace(0x0);
-        }
-    });
-}
-
-const patchCDPFilter = (base, offset, version) => {
-    // filter function: sub_14342D970
+const patchCDPFilter = (base, config) => {
     // xref: SendToClientFilter OR devtools_message_filter_applet_webview.cc
+    const offset = config.CDPFilterHookOffset;
     Interceptor.attach(base.add(offset), {
         onEnter(args) {
-            !VERBOSE ? console.log(`[patch] patch CDP filter ${offset}`) : console.log(`[patch] CDP filter ${offset} on enter, original value of v216:`, args[0].readPointer());
-            this.v216 = args[0];
+            send(
+                `[patch] CDP filter on enter, original value of input: ${args[0].readPointer()}`,
+            );
+            this.inputValue = args[0];
         },
         onLeave(retval) {
-            const v216Value = this.v216.readPointer();
-            VERBOSE && console.log(`[patch] CDP filter ${offset} on leave, patch v216, now value:`, v216Value, "; *(v216 + 8) =", v216Value.add(8).readU32());
-            if (v216Value.add(8).readU32() == 6) {
-                v216Value.add(8).writeU32(0x0);
+            const inputValue = this.inputValue.readPointer();
+            if (inputValue.isNull() || inputValue.add(8).isNull()) {
+                // there's a chance the value could be null
+                // return here to avoid crash
+                return;
             }
-        }
-    });
-}
 
-const onLoadStartHook = (a1, a2, version) => {
-    let structOffset = [1208, 1160, 16, 488];
-    switch (version) {
-        case 13331:
-        case 13341:
-        case 13487:
-        case 13639:
-        case 14315:
-            structOffset = [1272, 1224, 16, 488];
-            break;
-        case 13655:
-            structOffset = [1280, 1232, 16, 488];
-            break;
-        case 13871:
-        case 13909:
-        case 14161:
-        case 14199:
-        case 16133:
-        case 16203:
-        case 16389:
-        case 16467:
-        case 16771:
-            structOffset = [1360, 1312, 16, 488];
-            break;
-        case 16815:
-        case 16965:
-            structOffset = [1416, 1360, 16, 488];
-            break;
-        case 17037:
-        case 17071:
-        case 17127:
-            structOffset = [1408, 1352, 16, 488];
-            break;
-        case 18055:
-        case 18151:
-            structOffset = [1416, 1352, 16, 488];
-            break;
-        case 18787:
-        case 18891:
-        case 18955:
-            structOffset = [1408, 1344, 16, 488];
-            break;
-        case 19027:
-            structOffset = [1408, 1344, 16, 488];
-            break;
-    }
-    const passArgs = a1.add(56).readPointer().add(structOffset[0]).readPointer();
-    const passConditionPtr = passArgs.add(8).readPointer().add(structOffset[1]).readPointer().add(structOffset[2]).readPointer().add(structOffset[3]);
-    console.log("[hook] scene:", passConditionPtr.readInt());
+            send(
+                `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
+                    `*(input + 8) = ${inputValue.add(8).readU32()}`,
+            );
+            if (inputValue.add(8).readU32() == 6) {
+                inputValue.add(8).writeU32(0x0);
+            }
+        },
+    });
+};
+
+const hookOnLoadScene = (a1, sceneOffsets) => {
+    const miniappConfigPtr = a1
+        .add(56)
+        .readPointer()
+        .add(sceneOffsets[0])
+        .readPointer();
+    const miniappScenePtr = miniappConfigPtr
+        .add(8)
+        .readPointer()
+        .add(sceneOffsets[1])
+        .readPointer()
+        .add(16)
+        .readPointer()
+        .add(488);
+    send(`[hook] scene: ${miniappScenePtr.readInt()}`);
 
     // 1000: from issue #83 <-- will crash the process
     // 1007: from issue #80
@@ -102,36 +63,42 @@ const onLoadStartHook = (a1, a2, version) => {
     // 1260: from frequently used
     // 1302: from services
     // 1308: minigame?
-    const sceneNumberArray = [1005, 1007, 1008, 1027, 1035, 1053, 1074, 1145, 1178, 1256, 1260, 1302, 1308];
-    if (!sceneNumberArray.includes(passConditionPtr.readInt())) {
+    const sceneNumberArray = [
+        1005, 1007, 1008, 1027, 1035, 1053, 1074, 1145, 1178, 1256, 1260, 1302,
+        1308,
+    ];
+    if (!sceneNumberArray.includes(miniappScenePtr.readInt())) {
         return;
     }
-    console.log("[hook] hook scene condition -> 1101");
-    passConditionPtr.writeInt(1101);
+    send("[hook] hook scene condition -> 1101");
+    miniappScenePtr.writeInt(1101);
 
     // TODO: customize debugging endpoint
     // const websocketServerStringPtr = passArgs.add(8).readPointer().add(520);
     // VERBOSE && console.log("[hook] hook websocket server, original: ", websocketServerStringPtr.readUtf8String());
     // websocketServerStringPtr.writeUtf8String("ws://127.0.0.1:8189/");
-}
+};
 
-const interceptor = (base, offset, version) => {
+const patchOnLoadStart = (base, config) => {
     // xref: AppletIndexContainer::OnLoadStart
-    Interceptor.attach(base.add(offset), {
+    Interceptor.attach(base.add(config.LoadStartHookOffset), {
         onEnter(args) {
-            console.log("[inteceptor] AppletIndexContainer::OnLoadStart onEnter, indexContainer.this: ", this.context.rcx);
+            send(
+                `[inteceptor] AppletIndexContainer::OnLoadStart onEnter, ` +
+                    `indexContainer.this: ${this.context.rcx}`,
+            );
             // write dl to 0x1
-            if ((this.context.rdx & 0xFF) !== 1) {
-                this.context.rdx = (this.context.rdx & ~0xFF) | 0x1;
+            if ((this.context.rdx & 0xff) !== 1) {
+                this.context.rdx = (this.context.rdx & ~0xff) | 0x1;
             }
-            // handle others
-            onLoadStartHook(this.context.rcx, this.context.rdx, version);
+            // handle onLoad scene
+            hookOnLoadScene(this.context.rcx, config.SceneOffsets);
         },
         onLeave(retval) {
             // do nothing
-        }
-    })
-}
+        },
+    });
+};
 
 const parseConfig = () => {
     const rawConfig = `@@CONFIG@@`;
@@ -141,18 +108,17 @@ const parseConfig = () => {
             Version: 18955,
             LoadStartHookOffset: "0x25B52C0",
             CDPFilterHookOffset: "0x30248B0",
-            ResourceCachePolicyHookOffset: "0x262A9A0"
-        }
+            SceneOffsets: [1408, 1344],
+        };
     }
     return JSON.parse(rawConfig);
-}
+};
 
 const main = () => {
     const config = parseConfig();
     const mainModule = getMainModule(config.Version);
-    interceptor(mainModule.base, config.LoadStartHookOffset, config.Version);
-    patchResourceCachePolicy(mainModule.base, config.ResourceCachePolicyHookOffset, config.Version);
-    patchCDPFilter(mainModule.base, config.CDPFilterHookOffset, config.Version);
-}
+    patchOnLoadStart(mainModule.base, config);
+    patchCDPFilter(mainModule.base, config);
+};
 
 main();

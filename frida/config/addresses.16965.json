@@ -2,5 +2,5 @@
     "Version": 16965,
     "LoadStartHookOffset": "0x2570220",
     "CDPFilterHookOffset": "0x2F844A0",
-    "ResourceCachePolicyHookOffset": "0x25D0BA0"
+    "SceneOffsets": [1416, 1360]
 }
