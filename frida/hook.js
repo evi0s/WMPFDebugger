@@ -78,6 +78,7 @@ const onLoadStartHook = (a1, a2, version) => {
             break;
         case 18787:
         case 18891:
+        case 18955:
             structOffset = [1408, 1344, 16, 488];
             break;
     }
@@ -134,10 +135,10 @@ const parseConfig = () => {
     if (rawConfig.includes("@@")) {
         // test addresses
         return {
-            Version: 13341,
-            LoadStartHookOffset: "0x10009E0",
-            CDPFilterHookOffset: "0x242E8E0",
-            ResourceCachePolicyHookOffset: "0x1053730"
+            Version: 18955,
+            LoadStartHookOffset: "0x25B52C0",
+            CDPFilterHookOffset: "0x30248B0",
+            ResourceCachePolicyHookOffset: "0x262A9A0"
         }
     }
     return JSON.parse(rawConfig);
