@@ -43,7 +43,7 @@ const debug_server = (options: CliOptions, logger: Logger) => {
             logger.main_debug(`[miniapp] [DEBUG] decoded data:`);
             logger.main_debug(unwrappedData);
         } catch (e) {
-            logger.error(`[miniapp] client err: ${e}`);
+            logger.error(`[miniapp] miniapp client err: ${e}`);
         }
 
         if (unwrappedData === null) {
@@ -60,10 +60,10 @@ const debug_server = (options: CliOptions, logger: Logger) => {
         logger.info("[miniapp] miniapp client connected");
         ws.on("message", onMessage);
         ws.on("error", (err) => {
-            logger.error("[miniapp] client err:", err);
+            logger.error("[miniapp] miniapp client err:", err);
         });
         ws.on("close", () => {
-            logger.info("[miniapp] client disconnected");
+            logger.info("[miniapp] miniapp client disconnected");
         });
     });
 
