@@ -11,8 +11,7 @@ const patchCDPFilter = (base, config) => {
     Interceptor.attach(base.add(offset), {
         onEnter(args) {
             send(
-                `[patch] CDP filter on enter, original value of input:`,
-                args[0].readPointer(),
+                `[patch] CDP filter on enter, original value of input: ${args[0].readPointer()}`,
             );
             this.inputValue = args[0];
         },
@@ -25,10 +24,8 @@ const patchCDPFilter = (base, config) => {
             }
 
             send(
-                `[patch] CDP filter on leave, patch input, now value:`,
-                inputValue,
-                "; *(input + 8) =",
-                inputValue.add(8).readU32(),
+                `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
+                    `*(input + 8) = ${inputValue.add(8).readU32()}`,
             );
             if (inputValue.add(8).readU32() == 6) {
                 inputValue.add(8).writeU32(0x0);
@@ -87,8 +84,8 @@ const patchOnLoadStart = (base, config) => {
     Interceptor.attach(base.add(config.LoadStartHookOffset), {
         onEnter(args) {
             send(
-                "[inteceptor] AppletIndexContainer::OnLoadStart onEnter, indexContainer.this: ",
-                this.context.rcx,
+                `[inteceptor] AppletIndexContainer::OnLoadStart onEnter, ` +
+                    `indexContainer.this: ${this.context.rcx}`,
             );
             // write dl to 0x1
             if ((this.context.rdx & 0xff) !== 1) {
