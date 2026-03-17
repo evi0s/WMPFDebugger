@@ -121,7 +121,7 @@ const main = () => {
     const config = parseConfig();
     const mainModule = getMainModule(config.Version);
     patchOnLoadStart(mainModule.base, config);
-    patchCDPFilter(mainModule.base, config.CDPFilterHookOffset, config.Version);
+    patchCDPFilter(mainModule.base, config);
 };
 
 main();
