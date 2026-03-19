@@ -47,7 +47,7 @@ const hookOnLoadScene = (a1, sceneOffsets) => {
         .readPointer()
         .add(16)
         .readPointer()
-        .add(488);
+        .add(sceneOffsets[2]);
     send(`[hook] scene: ${miniappScenePtr.readInt()}`);
 
     // 1000: from issue #83 <-- will crash the process
@@ -108,7 +108,7 @@ const parseConfig = () => {
             Version: 18955,
             LoadStartHookOffset: "0x25B52C0",
             CDPFilterHookOffset: "0x30248B0",
-            SceneOffsets: [1408, 1344],
+            SceneOffsets: [1408, 1344, 488],
         };
     }
     return JSON.parse(rawConfig);
