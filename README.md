@@ -12,17 +12,18 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 Version histories:
 
-* 19027 (latest, credit @XKaguya)
+* 19201 (latest, credit @hidacow)
+* 19027 (credit @XKaguya)
 * 18955 (credit @MapleLeaf2007)
 * 18891 (credit @1357310795)
 * 18787
 * 18151 (credit @1437649480, @zxjBigPower)
-* 18055 (credit @Howard20181)
 
 <details>
 
 <summary>Older versions</summary>
 
+* 18055 (credit @Howard20181)
 * 17127 (credit @Howard20181)
 * 17071 (credit @hyzaw)
 * 17037 (credit @linguo2625469)
