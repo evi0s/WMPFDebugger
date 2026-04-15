@@ -145,7 +145,7 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
         (process) => process.name === "WeChatAppEx.exe",
     );
     const wmpfPids = wmpfProcesses.map((p) =>
-        p.parameters.ppid ? p.parameters.ppid : 0,
+        p.parameters.ppid ? Number(p.parameters.ppid) : 0,
     );
 
     // find the parent process
