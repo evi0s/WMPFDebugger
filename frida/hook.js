@@ -34,18 +34,20 @@ const patchCDPFilter = (base, config) => {
     });
 };
 
-const hookOnLoadScene = (a1, sceneOffsets) => {
+const hookOnLoadScene = (a1, sceneOffsets, scenePathOffsets) => {
+    const [configOffset, sceneRootOffset, sceneValueOffset] =
+        scenePathOffsets || [56, 8, 16];
     const miniappConfigPtr = a1
-        .add(56)
+        .add(configOffset)
         .readPointer()
         .add(sceneOffsets[0])
         .readPointer();
     const miniappScenePtr = miniappConfigPtr
-        .add(8)
+        .add(sceneRootOffset)
         .readPointer()
         .add(sceneOffsets[1])
         .readPointer()
-        .add(16)
+        .add(sceneValueOffset)
         .readPointer()
         .add(sceneOffsets[2]);
     send(`[hook] scene: ${miniappScenePtr.readInt()}`);
@@ -92,7 +94,11 @@ const patchOnLoadStart = (base, config) => {
                 this.context.rdx = (this.context.rdx & ~0xff) | 0x1;
             }
             // handle onLoad scene
-            hookOnLoadScene(this.context.rcx, config.SceneOffsets);
+            hookOnLoadScene(
+                this.context.rcx,
+                config.SceneOffsets,
+                config.ScenePathOffsets,
+            );
         },
         onLeave(retval) {
             // do nothing
@@ -109,6 +115,7 @@ const parseConfig = () => {
             LoadStartHookOffset: "0x25B52C0",
             CDPFilterHookOffset: "0x30248B0",
             SceneOffsets: [1408, 1344, 488],
+            ScenePathOffsets: [56, 8, 16],
         };
     }
     return JSON.parse(rawConfig);
