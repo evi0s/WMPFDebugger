@@ -12,15 +12,16 @@
 
 > [!WARNING]
 > 绝大多数安装问题都与网络和包管理器依赖相关，
-> 请仔细阅读 [README.zh.md][README.zh.md] 和已有 Issues。
+> 请仔细阅读 README.zh.md 和已有 Issues。
+> 
 > 描述不清晰/没有日志/无效提问的 Issue 会被直接关闭！
 > 
 > [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)
 
 > [!CAUTION]
-> **不要使用 NPM 包管理器！**此项目使用 `yarn` 包管理器。
+> **不要使用 NPM 包管理器！** 此项目使用 `yarn` 包管理器。
 > 
-> **不要删除 `yarn.lock`！**frida API 更新很快，需要锁依赖版本。
+> **不要删除 `yarn.lock`！** frida API 更新很快，需要锁依赖版本。
 
 ### Q: `yarn install` 卡 `Building fresh packages` 或需要安装 SDK 等相似问题
 
