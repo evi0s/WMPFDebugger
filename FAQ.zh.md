@@ -38,8 +38,6 @@
 ```bash
 set HTTP_PROXY=<YOUR_PROXY_ADDR>
 set HTTPS_PROXY=<YOUR_PROXY_ADDR>
-set npm_config_fetch_retries=5
-set npm_config_fetch_retry_msec_timeout=120000
 yarn
 ```
 
