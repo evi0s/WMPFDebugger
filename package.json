@@ -2,8 +2,14 @@
   "name": "WMPFDebugger",
   "version": "1.0.0",
   "main": "src/index.ts",
+  "scripts": {
+    "start": "npx ts-node src/index.ts"
+  },
   "license": "GPL-2.0-only",
   "author": "evi0s",
+  "pnpm": {
+    "onlyBuiltDependencies": ["frida"]
+  },
   "dependencies": {
     "frida": "^17.3.2",
     "protobufjs": "^7.5.4",
