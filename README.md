@@ -12,17 +12,18 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 Version histories:
 
-* 19841 (latest, credit @AwangYes)
+* 19871 (latest)
+* 19841 (credit @AwangYes)
 * 19823 (credit @mathmonkeyliu)
 * 19769
 * 19749 (credit @xiaoriri, @Alfalfaaaa, @chengzongcai)
 * 19481 (credit @cosalone, @jiangjie)
-* 19459 (credit @snowflake-x)
 
 <details>
 
 <summary>Older versions</summary>
 
+* 19459 (credit @snowflake-x)
 * 19339 (credit @hidacow)
 * 19201 (credit @hidacow)
 * 19027 (credit @XKaguya)
@@ -100,6 +101,13 @@ npx ts-node src/index.ts
 ![Console in DevTools](screenshots/console.png)
 
 ![Sources in DevTools](screenshots/sources.png)
+
+## FAQ
+
+Please refer to [FAQ.zh.md](FAQ.zh.md) (Chinese only).
+
+Please READ THE FAQ CAREFULLY prior to submitting new issues!
+All newly submitted issues that have EXISTING SOLUTIONS in FAQ will be CLOSED WITHOUT ANY RESPONSE!
 
 ## Disclaimer
 
