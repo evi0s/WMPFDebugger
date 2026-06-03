@@ -21,7 +21,7 @@ const bufferToHexString = (buffer: ArrayBuffer) => {
         .join("");
 };
 
-const debug_server = (options: CliOptions, logger: Logger) => {
+const debug_server = (options: CliOptions, logger: Logger): WebSocketServer => {
     const wss = new WebSocketServer({ port: options.debugPort });
     logger.info(
         `[server] debug server running on ws://localhost:${options.debugPort}`,
@@ -100,9 +100,11 @@ const debug_server = (options: CliOptions, logger: Logger) => {
                 }
             });
     });
+
+    return wss;
 };
 
-const proxy_server = (options: CliOptions, logger: Logger) => {
+const proxy_server = (options: CliOptions, logger: Logger): WebSocketServer => {
     const wss = new WebSocketServer({ port: options.cdpPort });
     logger.info(
         `[server] proxy server running on ws://localhost:${options.cdpPort}`,
@@ -135,9 +137,11 @@ const proxy_server = (options: CliOptions, logger: Logger) => {
                 }
             });
     });
+
+    return wss;
 };
 
-const frida_server = async (options: CliOptions, logger: Logger) => {
+const frida_server = async (options: CliOptions, logger: Logger): Promise<frida.Session> => {
     const isMac = require("node:os").platform() === "darwin";
     const localDevice = await frida.getLocalDevice();
     const processes = await localDevice.enumerateProcesses({
@@ -236,7 +240,6 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
         ).toString();
     } catch (e) {
         throw new Error("[frida] hook script not found");
-        return;
     }
 
     let configContent: string | null = null;
@@ -253,7 +256,6 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
 
     if (scriptContent === null || configContent === null) {
         throw new Error("[frida] unable to find hook script");
-        return;
     }
 
     // load script
@@ -273,14 +275,24 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
         `[frida] script loaded, config: ${configFileName}, pid: ${wmpfPid}`,
     );
     logger.info(`[frida] you can now open any miniapps`);
+
+    return session;
 };
 
 const main = async () => {
     const options = parse_cli_options();
     const logger = create_logger(options);
-    debug_server(options, logger);
-    proxy_server(options, logger);
-    frida_server(options, logger);
+    const debugWss = debug_server(options, logger);
+    const proxyWss = proxy_server(options, logger);
+    const session = await frida_server(options, logger);
+
+    process.on("SIGINT", async () => {
+        logger.info("[server] shutting down...");
+        debugWss.close();
+        proxyWss.close();
+        await session.detach();
+        process.exit(0);
+    });
 };
 
 (async () => {
