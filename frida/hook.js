@@ -1,4 +1,7 @@
-const getMainModule = (version) => {
+const getMainModule = (version, platform) => {
+    if (platform === "mac") {
+        return Process.findModuleByName("WeChatAppEx Framework");
+    }
     if (version >= 13331) {
         return Process.findModuleByName("flue.dll");
     }
@@ -7,28 +10,45 @@ const getMainModule = (version) => {
 
 const patchCDPFilter = (base, config) => {
     // xref: SendToClientFilter OR devtools_message_filter_applet_webview.cc
+    const isMac = config.Platform === "mac";
     const offset = config.CDPFilterHookOffset;
     Interceptor.attach(base.add(offset), {
         onEnter(args) {
-            send(
-                `[patch] CDP filter on enter, original value of input: ${args[0].readPointer()}`,
-            );
-            this.inputValue = args[0];
+            if (!isMac) {
+                // x64 windows: save args[0] for use in onLeave
+                send(
+                    `[patch] CDP filter on enter, original value of input: ${args[0].readPointer()}`,
+                );
+                this.inputValue = args[0];
+            }
         },
         onLeave(retval) {
-            const inputValue = this.inputValue.readPointer();
-            if (inputValue.isNull() || inputValue.add(8).isNull()) {
-                // there's a chance the value could be null
-                // return here to avoid crash
-                return;
-            }
-
-            send(
-                `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
-                    `*(input + 8) = ${inputValue.add(8).readU32()}`,
-            );
-            if (inputValue.add(8).readU32() == 6) {
-                inputValue.add(8).writeU32(0x0);
+            if (isMac) {
+                // arm64 mac: caller checks retval+8 == 6, patch it to 0
+                if (retval.isNull()) return;
+                try {
+                    const val = retval.add(8).readU32();
+                    send(`[patch] CDP filter on leave (mac), retval+8 = ${val}`);
+                    if (val === 6) {
+                        retval.add(8).writeU32(0x0);
+                        send("[patch] CDP filter patched (mac)");
+                    }
+                } catch (e) {
+                    send(`[patch] CDP filter error: ${e}`);
+                }
+            } else {
+                // x64 windows: patch *args[0]+8
+                const inputValue = this.inputValue.readPointer();
+                if (inputValue.isNull() || inputValue.add(8).isNull()) {
+                    return;
+                }
+                send(
+                    `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
+                        `*(input + 8) = ${inputValue.add(8).readU32()}`,
+                );
+                if (inputValue.add(8).readU32() == 6) {
+                    inputValue.add(8).writeU32(0x0);
+                }
             }
         },
     });
@@ -81,18 +101,29 @@ const hookOnLoadScene = (a1, sceneOffsets) => {
 
 const patchOnLoadStart = (base, config) => {
     // xref: AppletIndexContainer::OnLoadStart
+    const isMac = config.Platform === "mac";
     Interceptor.attach(base.add(config.LoadStartHookOffset), {
         onEnter(args) {
+            // arm64 (mac): x0=this, x1=debug_flag
+            // x64 (windows): rcx=this, rdx=debug_flag
+            const thisPtr = isMac ? this.context.x0 : this.context.rcx;
             send(
                 `[inteceptor] AppletIndexContainer::OnLoadStart onEnter, ` +
-                    `indexContainer.this: ${this.context.rcx}`,
+                    `indexContainer.this: ${thisPtr}`,
             );
-            // write dl to 0x1
-            if ((this.context.rdx & 0xff) !== 1) {
-                this.context.rdx = (this.context.rdx & ~0xff) | 0x1;
+            if (isMac) {
+                // arm64: set x1 (debug flag) to 1
+                if ((this.context.x1.toInt32() & 0xff) !== 1) {
+                    this.context.x1 = ptr(1);
+                }
+            } else {
+                // x64: write dl to 0x1
+                if ((this.context.rdx & 0xff) !== 1) {
+                    this.context.rdx = (this.context.rdx & ~0xff) | 0x1;
+                }
             }
             // handle onLoad scene
-            hookOnLoadScene(this.context.rcx, config.SceneOffsets);
+            hookOnLoadScene(thisPtr, config.SceneOffsets);
         },
         onLeave(retval) {
             // do nothing
@@ -116,9 +147,13 @@ const parseConfig = () => {
 
 const main = () => {
     const config = parseConfig();
-    const mainModule = getMainModule(config.Version);
+    const mainModule = getMainModule(config.Version, config.Platform);
     patchOnLoadStart(mainModule.base, config);
-    patchCDPFilter(mainModule.base, config);
+    if (!config.DisableCDPFilter) {
+        patchCDPFilter(mainModule.base, config);
+    } else {
+        send("[info] CDPFilter hook disabled");
+    }
 };
 
 main();

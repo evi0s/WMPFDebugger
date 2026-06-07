@@ -1,13 +1,17 @@
 # WMPFDebugger
 
-又一个 Windows 微信小程序调试工具
+又一个 Windows / macOS 微信小程序调试工具
 
 这个工具通过 patch 一些 Chrome 调试协议（CDP）的过滤器和其他的条件判断来强制小程序连接到外部调试器（也就是远程调试，LanDebug 模式）。这个调试协议是基于 protobuf 实现的私有协议，通过逆向开发者工具提取相应的协议实现，该工具实现了一个简单的小程序调试协议转换为标准 Chrome 调试协议，从而允许我们使用标准基于 chromium 浏览器的内嵌开发者工具来调试任意小程序
 
 
 ## 支持状态
 
-支持的 WMPF 版本：
+支持的 WMPF 版本 (macOS):
+
+* 17078 / 微信 3.8.7 (macOS arm64, credit @dm)
+
+支持的 WMPF 版本 (Windows):
 
 * 19871 (最新)
 * 19841 (credit @AwangYes)
@@ -56,13 +60,32 @@
 
 如何调试微信内置浏览器页面：参见 [EXTENSION.md](EXTENSION.md)。注意，目前该方法仅有基础调试功能
 
-如何检查版本：打开任务管理器，找到 WeChatAppEx 进程，右键，打开文件所在的位置，检查在 `RadiumWMPF` 和 `extracted` 之间的数字
+如何检查版本：打开任务管理器，找到 WeChatAppEx 进程，右键，打开文件所在的位置，检查在 `RadiumWMPF` 和 `extracted` 之间的数字。macOS 上执行 `grep CFBundleVersion "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"`，取版本字符串中最后一个数字
 
 如何适配到其他版本：参见 [ADAPTATION.md](ADAPTATION.md)。另外，你也可以提交版本适配的 Issue，我会尝试适配该版本如果我有相应的版本的 binary。仅更新版本的适配请求会被考虑
 
 如何更新到最新的 WMPF 版本（微信版本 > 4.x）：官网 `pc.weixin.qq.com` 下载最新版微信。最新版 WMPF 会随新版安装包被一同安装。
 
 如何更新到最新的 WMPF 版本（微信版本 < 4.x）：搜索框输入 `:showcmdwnd`（不要按回车触发搜索）弹出命令窗口，输入 `/plugin set_grayvalue=202&check_update_force` 并回车等待更新（如果有新版本）。重启微信以生效。
+
+
+## macOS arm64 支持
+
+现已支持 macOS arm64 (Apple Silicon)。实现基于与 Windows 相同的 WMPF 内部机制，针对平台差异做了适配：
+
+- 模块名：`WeChatAppEx Framework`（对应 Windows 的 `flue.dll`）
+- 寄存器约定：`x0` / `x1`（对应 Windows x64 的 `rcx` / `rdx`）
+- CDPFilter：修补 `retval+8`（对应 Windows 的 `*args[0]+8`）
+- 配置文件：`mac.addresses.{version}.json`（如 `mac.addresses.17078.json`）
+
+**如何在 macOS 上检查 WMPF 版本：**
+
+```bash
+grep CFBundleVersion "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"
+# 查看版本字符串中的最后一个数字，如 6.17078 → 17078
+```
+
+适配新版本：可使用 `frida/detect_offsets.js` 自动探测 hook 偏移量。
 
 
 ## 准备
