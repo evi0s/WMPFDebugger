@@ -7,9 +7,10 @@
 
 ## 支持状态
 
-支持的 WMPF 版本：
+支持的 WMPF 版本
 
-* 19977 (最新)
+* 20001 (最新)
+* 19977 
 * 19921 
 * 19899 (credit @mathmonkeyliu)
 * 19881 (credit @WIAIV)
