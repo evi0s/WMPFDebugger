@@ -5,6 +5,7 @@ import * as frida from "frida";
 import WebSocket, { WebSocketServer } from "ws";
 
 import { parse_cli_options, CliOptions } from "./cli";
+import { readVersionConfig } from "./fridaConfig";
 import { create_logger, Logger } from "./logger";
 
 const codex = require("./third-party/RemoteDebugCodex.js");
@@ -167,9 +168,7 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
     const wmpfVersionMatch = wmpfProcessPath
         ? wmpfProcessPath.match(/\d+/g)
         : "";
-    const wmpfVersion = wmpfVersionMatch
-        ? new Number(wmpfVersionMatch.pop())
-        : 0;
+    const wmpfVersion = wmpfVersionMatch ? Number(wmpfVersionMatch.pop()) : 0;
     if (wmpfVersion === 0) {
         throw new Error("[frida] error in find wmpf version");
         return;
@@ -197,21 +196,7 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
         return;
     }
 
-    let configContent: string | null = null;
-    try {
-        configContent = (
-            await promises.readFile(
-                path.join(
-                    projectRoot,
-                    "frida/config",
-                    `addresses.${wmpfVersion}.json`,
-                ),
-            )
-        ).toString();
-        configContent = JSON.stringify(JSON.parse(configContent));
-    } catch (e) {
-        throw new Error(`[frida] version config not found: ${wmpfVersion}`);
-    }
+    const configContent = await readVersionConfig(projectRoot, wmpfVersion);
 
     if (scriptContent === null || configContent === null) {
         throw new Error("[frida] unable to find hook script");
