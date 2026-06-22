@@ -9,17 +9,26 @@
 
 支持的 WMPF 版本：
 
-* 19459 (最新, credit @snowflake-x)
-* 19339 (credit @hidacow)
-* 19201 (credit @hidacow)
-* 19027 (credit @XKaguya)
-* 18955 (credit @MapleLeaf2007)
-* 18891 (credit @1357310795)
+* 19921 (最新)
+* 19899 (credit @mathmonkeyliu)
+* 19881 (credit @WIAIV)
+* 19871
+* 19841 (credit @AwangYes)
+* 19823 (credit @mathmonkeyliu)
 
 <details>
 
 <summary>更早版本</summary>
 
+* 19769
+* 19749 (credit @xiaoriri, @Alfalfaaaa, @chengzongcai)
+* 19481 (credit @cosalone, @jiangjie)
+* 19459 (credit @snowflake-x)
+* 19339 (credit @hidacow)
+* 19201 (credit @hidacow)
+* 19027 (credit @XKaguya)
+* 18955 (credit @MapleLeaf2007)
+* 18891 (credit @1357310795)
 * 18787
 * 18151 (credit @1437649480, @zxjBigPower)
 * 18055 (credit @Howard20181)
@@ -93,17 +102,22 @@ npx ts-node src/index.ts
 
 ![Sources in DevTools](screenshots/sources.png)
 
+## 常见问题
+
+参见 [FAQ.zh.md](FAQ.zh.md)
+
+在提出新 Issue 前请**务必**阅读 FAQ。
+如果新 Issue 与 FAQ 中已有的问题重复，该 Issue 会被直接关闭且不会作出任何回复
+
 ## 免责声明
 
 **本库只能作为学习用途，造成的任何问题与本库开发者无关，如侵犯到你的权益，请联系删除**
 
 该程序以 GPLv2 许可证开源，参考许可证第十一及十二条：
 
-本程序为免费授权，故在适用法律范围内不提供品质担保。除非另作书面声明，版权持有人及其他程式提供者“概”不提供任何显式或隐式的品质担保，品质担保所指包括而不仅限于有经济价值和适合特定用途的保证。全部风险，如程序的质量和性能问题，皆由你承担。若程序出现缺陷，你将承担所有必要的修复和更正服务的费用
+本程序为免费授权，故在适用法律范围内不提供品质担保。除非另作书面声明，版权持有人及其他程序提供者“概”不提供任何显式或隐式的品质担保，品质担保所指包括而不仅限于有经济价值和适合特定用途的保证。全部风险，如程序的质量和性能问题，皆由你承担。若程序出现缺陷，你将承担所有必要的修复和更正服务的费用
 
 除非适用法律或书面协议要求，任何版权持有人或本程序按本协议可能存在的第三方修改和再发布者，都不对你的损失负有责任，包括由于使用或者不能使用本程序造成的任何一般的、特殊的、偶发的或重大的损失（包括而不仅限于数据丢失、数据失真、你或第三方的后续损失、其他程序无法与本程序协同运作），即使那些人声称会对此负责
 
 
 此外，在 `src/third-party` 中，所有代码从微信开发者工具提取，因此腾讯控股有限公司拥有对该代码的所有版权
-
-
