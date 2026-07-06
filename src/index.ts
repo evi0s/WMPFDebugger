@@ -5,6 +5,7 @@ import * as frida from "frida";
 import WebSocket, { WebSocketServer } from "ws";
 
 import { parse_cli_options, CliOptions } from "./cli";
+import { CdpRouter } from "./cdp-router";
 import { create_logger, Logger } from "./logger";
 
 const codex = require("./third-party/RemoteDebugCodex.js");
@@ -103,6 +104,7 @@ const debug_server = (options: CliOptions, logger: Logger) => {
 
 const proxy_server = (options: CliOptions, logger: Logger) => {
     const wss = new WebSocketServer({ port: options.cdpPort });
+    let activeH5Client: WebSocket | null = null;
     logger.info(
         `[server] proxy server running on ws://localhost:${options.cdpPort}`,
     );
@@ -110,29 +112,86 @@ const proxy_server = (options: CliOptions, logger: Logger) => {
         `[server] link: devtools://devtools/bundled/inspector.html?ws=127.0.0.1:${options.cdpPort}`,
     );
 
-    const onMessage = (message: string) => {
-        debugMessageEmitter.emit("proxymessage", message);
-    };
+    if (options.h5Url === null) {
+        const onMessage = (message: string) => {
+            debugMessageEmitter.emit("proxymessage", message.toString());
+        };
+
+        wss.on("connection", (ws: WebSocket) => {
+            logger.info("[cdp] CDP client connected");
+            ws.on("message", onMessage);
+            ws.on("error", (err) => {
+                logger.error("[cdp] CDP client err:", err);
+            });
+            ws.on("close", () => {
+                logger.info("[cdp] CDP client disconnected");
+            });
+        });
+
+        debugMessageEmitter.on("cdpmessage", (message: string) => {
+            wss &&
+                wss.clients.forEach((client) => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(message);
+                    }
+                });
+        });
+
+        return;
+    }
+
+    logger.info(`[h5] auto attach enabled, URL keyword: ${options.h5Url}`);
 
     wss.on("connection", (ws: WebSocket) => {
+        if (activeH5Client !== null) {
+            logger.error(
+                "[cdp] rejecting CDP client: H5 mode allows only one active CDP client",
+            );
+            ws.close(1013, "H5 client active");
+            return;
+        }
+
+        activeH5Client = ws;
+
         logger.info("[cdp] CDP client connected");
-        ws.on("message", onMessage);
+        const router = new CdpRouter({ h5Url: options.h5Url }, logger);
+
+        const sendToWechat = (message: string) => {
+            debugMessageEmitter.emit("proxymessage", message);
+        };
+
+        const sendToDevtools = (message: string) => {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(message);
+            }
+        };
+
+        router.on("wechat", sendToWechat);
+        router.on("devtools", sendToDevtools);
+
+        const onCdpMessage = (message: string) => {
+            router.handleWechatMessage(message);
+        };
+
+        debugMessageEmitter.on("cdpmessage", onCdpMessage);
+        router.start();
+
+        ws.on("message", (message) => {
+            router.handleDevtoolsMessage(message.toString());
+        });
         ws.on("error", (err) => {
             logger.error("[cdp] CDP client err:", err);
         });
         ws.on("close", () => {
             logger.info("[cdp] CDP client disconnected");
+            if (activeH5Client === ws) {
+                activeH5Client = null;
+            }
+            router.dispose();
+            router.off("wechat", sendToWechat);
+            router.off("devtools", sendToDevtools);
+            debugMessageEmitter.off("cdpmessage", onCdpMessage);
         });
-    });
-
-    debugMessageEmitter.on("cdpmessage", (message: string) => {
-        wss &&
-            wss.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN) {
-                    // send CDP message to devtools
-                    client.send(message);
-                }
-            });
     });
 };
 

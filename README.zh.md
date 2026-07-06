@@ -61,7 +61,7 @@
 
 </details>
 
-如何调试微信内置浏览器页面：参见 [EXTENSION.md](EXTENSION.md)。注意，目前该方法仅有基础调试功能
+如何调试微信内置浏览器/公众号 H5 页面：启动时传入 `--h5-url <URL关键字>` 可自动匹配并附加到对应页面；如果自动匹配不可用，参见 [EXTENSION.md](EXTENSION.md) 使用手动 fallback。注意，目前该方法依赖微信暴露的内置浏览器 CDP target，Elements 面板等能力可能仍有限。
 
 如何检查版本：打开任务管理器，找到 WeChatAppEx 进程，右键，打开文件所在的位置，检查在 `RadiumWMPF` 和 `extracted` 之间的数字
 
@@ -99,6 +99,18 @@ npx ts-node src/index.ts
 **第 3 步** 打开任意你想调试的小程序
 
 **第 4 步** 打开浏览器，访问 `devtools://devtools/bundled/inspector.html?ws=127.0.0.1:62000` 即可。你也可以将 CDP 端口（在例子中为 62000）修改到任意其他端口。相关代码定义在 `src/index.ts` 中
+
+### 调试公众号 H5 页面
+
+启动调试器时传入 H5 页面的 URL 关键字，例如：
+
+```bash
+npx ts-node src/index.ts --h5-url mp.weixin.qq.com
+```
+
+随后仍需要先打开任意小程序来初始化调试会话，再在微信中打开目标公众号 H5 页面。打开浏览器访问 `devtools://devtools/bundled/inspector.html?ws=127.0.0.1:62000` 后，代理会自动查找 URL 包含该关键字的内置浏览器 target，并附加到该页面。
+
+如果日志提示没有找到匹配 target，请确认 H5 页面已经在微信中打开，或改用更精确的 URL 关键字。自动附加失败时，可以继续参考 [EXTENSION.md](EXTENSION.md) 使用 Protocol Monitor 手动附加。
 
 ## 截图
 

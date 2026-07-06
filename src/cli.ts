@@ -5,6 +5,7 @@ type CliOptions = {
     cdpPort: number;
     debugMain: boolean;
     debugFrida: boolean;
+    h5Url: string | null;
 };
 
 // default debugging port, do not change
@@ -19,6 +20,7 @@ const print_help = () => {
 Options:
   --debug-port <port>  Remote debug server port (default: ${DEBUG_PORT})
   --cdp-port <port>    CDP proxy server port (default: ${CDP_PORT})
+  --h5-url <keyword>   Auto attach to an embedded browser target whose URL contains keyword
   --debug-main         Output main process debug messages
   --debug-frida        Output Frida client messages
   -h, --help           Show this help message`);
@@ -41,11 +43,28 @@ const parse_port = (
     return port;
 };
 
+const parse_optional_non_empty_string = (
+    name: string,
+    value: string | undefined,
+) => {
+    if (value === undefined) {
+        return null;
+    }
+
+    const trimmedValue = value.trim();
+    if (trimmedValue.length === 0) {
+        throw new Error(`[main] invalid ${name}: value cannot be empty`);
+    }
+
+    return trimmedValue;
+};
+
 const parse_cli_options = (): CliOptions => {
     const { values } = parseArgs({
         options: {
             "debug-port": { type: "string" },
             "cdp-port": { type: "string" },
+            "h5-url": { type: "string" },
             "debug-main": { type: "boolean" },
             "debug-frida": { type: "boolean" },
             help: { type: "boolean", short: "h" },
@@ -61,6 +80,7 @@ const parse_cli_options = (): CliOptions => {
     return {
         debugPort: parse_port("--debug-port", values["debug-port"], DEBUG_PORT),
         cdpPort: parse_port("--cdp-port", values["cdp-port"], CDP_PORT),
+        h5Url: parse_optional_non_empty_string("--h5-url", values["h5-url"]),
         debugMain: values["debug-main"] ?? false,
         debugFrida: values["debug-frida"] ?? false,
     };

@@ -1,6 +1,6 @@
 # WeChat Embedded Browser Page Debugging
 
-This is a simple workaround of utilizing existing debugging protocol to debug web pages of WeChat Embedded Browser.
+This is the manual fallback for debugging web pages of WeChat Embedded Browser. Prefer the automatic `--h5-url <keyword>` workflow in `README.md` first; use this document when automatic target matching cannot locate the desired page.
 
 ## Background
 
@@ -32,5 +32,3 @@ You can verify all targets via Protocol Monitor, and the miniapp tab (AppIndex) 
 All done. After these steps you have successfully attached to the tab. Please note that the Element tab will not update so you cannot use that panel to inspect the DOM tree. Also, you cannot close the miniapp since it will stop the debug session.
 
 In addition, for miniapps that using `webview` tag, you can also use the same method above to attach to the WebView tab and inspect.
-
-

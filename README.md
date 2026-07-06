@@ -63,7 +63,7 @@ Version histories:
 
 </details>
 
-To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EXTENSION.md). Note that this feature has many limitations currently and is simply a basic workaround.
+To debug web pages of WeChat embedded browser or WeChat Official Account H5 pages, start with `--h5-url <url-keyword>` to automatically attach to a matching embedded-browser target. If automatic target matching does not work, use the manual fallback in [EXTENSION.md](EXTENSION.md). Note that this feature depends on the CDP targets exposed by WeChat, so some panels such as Elements may still be limited.
 
 To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`.
 
@@ -101,6 +101,18 @@ npx ts-node src/index.ts
 **Step 3.** Launch any miniapp you would like to debug.
 
 **Step 4.** Open your chromium-based browsers, navigate to `devtools://devtools/bundled/inspector.html?ws=127.0.0.1:62000` and profit. You can change the CDP port `CDP_PORT` (62000 in this example) in `src/index.ts` to any port you like.
+
+### Debug WeChat Official Account H5 Pages
+
+Start the debugger with a URL keyword for the target H5 page:
+
+```bash
+npx ts-node src/index.ts --h5-url mp.weixin.qq.com
+```
+
+You still need to launch a miniapp first to initialize the debug session, then open the target H5 page in WeChat. After opening `devtools://devtools/bundled/inspector.html?ws=127.0.0.1:62000`, the proxy searches for an embedded-browser target whose URL contains the keyword and attaches to that page automatically.
+
+If the logs say no matching target was found, make sure the H5 page is already open in WeChat or use a more specific URL keyword. When automatic attach fails, you can still use the Protocol Monitor fallback in [EXTENSION.md](EXTENSION.md).
 
 ## Screenshots
 
