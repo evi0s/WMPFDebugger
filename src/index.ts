@@ -4,6 +4,7 @@ import path from "node:path";
 import * as frida from "frida";
 import WebSocket, { WebSocketServer } from "ws";
 
+import { platform } from "./platform";
 import { parse_cli_options, CliOptions } from "./cli";
 import { create_logger, Logger } from "./logger";
 
@@ -138,42 +139,7 @@ const proxy_server = (options: CliOptions, logger: Logger) => {
 
 const frida_server = async (options: CliOptions, logger: Logger) => {
     const localDevice = await frida.getLocalDevice();
-    const processes = await localDevice.enumerateProcesses({
-        scope: frida.Scope.Metadata,
-    });
-    const wmpfProcesses = processes.filter(
-        (process) => process.name === "WeChatAppEx.exe",
-    );
-    const wmpfPids = wmpfProcesses.map((p) =>
-        p.parameters.ppid ? p.parameters.ppid : 0,
-    );
-
-    // find the parent process
-    const wmpfPid = wmpfPids
-        .sort(
-            (a, b) =>
-                wmpfPids.filter((v) => v === a).length -
-                wmpfPids.filter((v) => v === b).length,
-        )
-        .pop();
-    if (wmpfPid === undefined) {
-        throw new Error("[frida] WeChatAppEx.exe process not found");
-        return;
-    }
-    const wmpfProcess = processes.filter(
-        (process) => process.pid === wmpfPid,
-    )[0];
-    const wmpfProcessPath = wmpfProcess.parameters.path as string | undefined;
-    const wmpfVersionMatch = wmpfProcessPath
-        ? wmpfProcessPath.match(/\d+/g)
-        : "";
-    const wmpfVersion = wmpfVersionMatch
-        ? new Number(wmpfVersionMatch.pop())
-        : 0;
-    if (wmpfVersion === 0) {
-        throw new Error("[frida] error in find wmpf version");
-        return;
-    }
+    const { pid: wmpfPid, version: wmpfVersion } = await platform.findWmpfProcess()
 
     // attach to process
     const session = await localDevice.attach(Number(wmpfPid));
@@ -194,7 +160,6 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
         ).toString();
     } catch (e) {
         throw new Error("[frida] hook script not found");
-        return;
     }
 
     let configContent: string | null = null;
@@ -203,7 +168,7 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
             await promises.readFile(
                 path.join(
                     projectRoot,
-                    "frida/config",
+                    `frida/config/${process.platform}`,
                     `addresses.${wmpfVersion}.json`,
                 ),
             )
@@ -215,7 +180,6 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
 
     if (scriptContent === null || configContent === null) {
         throw new Error("[frida] unable to find hook script");
-        return;
     }
 
     // load script

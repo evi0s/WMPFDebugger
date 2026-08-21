@@ -1,8 +1,14 @@
 const getMainModule = (version) => {
-    if (version >= 13331) {
-        return Process.findModuleByName("flue.dll");
+    const osPlatform = Process.platform
+    if (osPlatform === 'windows') {
+        if (version >= 13331) {
+            return Process.findModuleByName("flue.dll");
+        }
+        return Process.findModuleByName("WeChatAppEx.exe");
+    } else if (osPlatform == 'linux') {
+        return Process.findModuleByName("WeChatAppEx")
     }
-    return Process.findModuleByName("WeChatAppEx.exe");
+
 };
 
 const patchCDPFilter = (base, config) => {
@@ -85,14 +91,14 @@ const patchOnLoadStart = (base, config) => {
         onEnter(args) {
             send(
                 `[inteceptor] AppletIndexContainer::OnLoadStart onEnter, ` +
-                    `indexContainer.this: ${this.context.rcx}`,
+                    `indexContainer.this: ${args[0]}`,
             );
             // write dl to 0x1
-            if ((this.context.rdx & 0xff) !== 1) {
-                this.context.rdx = (this.context.rdx & ~0xff) | 0x1;
+            if (args[1].and(0xff).toInt32() !== 1) {
+                args[1] = args[1].and(ptr("0xffffffffffffff00")).or(1);
             }
             // handle onLoad scene
-            hookOnLoadScene(this.context.rcx, config.SceneOffsets);
+            hookOnLoadScene(args[0], config.SceneOffsets);
         },
         onLeave(retval) {
             // do nothing
