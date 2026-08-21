@@ -10,7 +10,7 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 ## Support Status
 
 
-Version histories:
+**Version histories (Windows):**
 
 * 25459 (latest, credit @1147529365)
 * 25364 (credit @lyratu)
@@ -68,6 +68,11 @@ Version histories:
 * 11581 (unstable, will connect but crash renderer, feel free to test)
 
 </details>
+
+
+**Version histories (Linux):**
+
+* 14978 (latest, credit @Redbeanw44602)
 
 To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EXTENSION.md). Note that this feature has many limitations currently and is simply a basic workaround.
 

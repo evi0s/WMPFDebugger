@@ -7,7 +7,7 @@
 
 ## 支持状态
 
-支持的 WMPF 版本：
+**支持的 WMPF 版本 (Windows)：**
 
 * 25459 (最新, credit @1147529365)
 * 25364 (credit @lyratu)
@@ -66,6 +66,12 @@
 * 11581 (成功连接但会随后渲染进程 crash，请自行测试)
 
 </details>
+
+
+**支持的 WMPF 版本 (Windows)：**
+
+* 14978 (最新, credit @Redbeanw44602)
+
 
 如何调试微信内置浏览器页面：参见 [EXTENSION.md](EXTENSION.md)。注意，目前该方法仅有基础调试功能
 
