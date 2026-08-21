@@ -68,7 +68,7 @@
 </details>
 
 
-**支持的 WMPF 版本 (Windows)：**
+**支持的 WMPF 版本 (Linux)：**
 
 * 14978 (最新, credit @Redbeanw44602)
 
