@@ -22,6 +22,19 @@ const getMainModule = (version) => {
 };
 
 const patchCDPFilter = (base, config) => {
+    if (config.CastToJsonOffset) {
+        const castToJson = new NativeFunction(
+            base.add(config.CastToJsonOffset),
+            "pointer",
+            ["pointer", "pointer", "pointer"]
+        );
+        const callback = new NativeCallback(function (out, thiz, data, len) {
+            castToJson(out, data, len)
+            return out
+        }, "pointer", ["pointer", "pointer", "pointer", "pointer"]);
+        Interceptor.replace(base.add(config.CDPFilterHookOffset), callback);
+        return;
+    }
     // xref: SendToClientFilter OR devtools_message_filter_applet_webview.cc
     const offset = config.CDPFilterHookOffset;
     Interceptor.attach(base.add(offset), {
