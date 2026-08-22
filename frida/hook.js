@@ -131,26 +131,16 @@ const patchOnLoadStart = (base, config) => {
     // xref: AppletIndexContainer::OnLoadStart
     Interceptor.attach(base.add(config.LoadStartHookOffset), {
         onEnter(args) {
-            // arm64 (darwin): x0=this, x1=debug_flag
-            // x64 (windows/linux): rcx=this, rdx=debug_flag
-            const thisPtr = isArmDarwin() ? this.context.x0 : this.context.rcx;
             send(
                 `[inteceptor] AppletIndexContainer::OnLoadStart onEnter, ` +
-                    `indexContainer.this: ${thisPtr}`,
+                    `indexContainer.this: ${args[0]}`,
             );
-            if (isArmDarwin()) {
-                // arm64 darwin: set x1 to 1
-                if ((this.context.x1.toInt32() & 0xff) !== 1) {
-                    this.context.x1 = ptr(1);
-                }
-            } else {
-                // x64 windows/linux: set dl to 1
-                if ((this.context.rdx & 0xff) !== 1) {
-                    this.context.rdx = (this.context.rdx & ~0xff) | 0x1;
-                }
+            // write dl to 0x1
+            if (args[1].and(0xff).toInt32() !== 1) {
+                args[1] = args[1].and(ptr("0xffffffffffffff00")).or(1);
             }
             // handle onLoad scene
-            hookOnLoadScene(thisPtr, config.SceneOffsets);
+            hookOnLoadScene(args[0], config.SceneOffsets);
         },
         onLeave(retval) {
             // do nothing
