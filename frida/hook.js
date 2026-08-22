@@ -135,7 +135,7 @@ const patchOnLoadStart = (base, config) => {
                 `[inteceptor] AppletIndexContainer::OnLoadStart onEnter, ` +
                     `indexContainer.this: ${args[0]}`,
             );
-            // write dl to 0x1
+            // write debug_flag to 0x1
             if (args[1].and(0xff).toInt32() !== 1) {
                 args[1] = args[1].and(ptr("0xffffffffffffff00")).or(1);
             }
