@@ -2,15 +2,16 @@
 
 [English](README.md) | [中文](README.zh.md)
 
-Yet another WeChat miniapp debugger on Windows (WMPF).
+Yet another WeChat Mini-Program Framework (WMPF) debugger.
 
 This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools and patches serval restrictions to force miniapp runtime to support full Chrome Debug Protocol, and thus can be directly applied to standard devtools shipped with chromium-based browsers.
 
 
 ## Support Status
 
+### Windows (X86_64) Support
 
-**Version histories (Windows):**
+**Version histories:**
 
 * 25459 (latest, credit @1147529365)
 * 25364 (credit @lyratu)
@@ -69,14 +70,7 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 </details>
 
-
-**Version histories (Linux):**
-
-* 14978 (latest, credit @Redbeanw44602)
-
-To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EXTENSION.md). Note that this feature has many limitations currently and is simply a basic workaround.
-
-To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`.
+To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`. On macOS, run `grep CFBundleVersion "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"` and use the last number in the version string.
 
 To adapt to another version, please find the instructions in [ADAPTATION.md](ADAPTATION.md). Alternatively, you can submit an issue for new version adaption and I will try that if I have the binary. Note that only newer version adaption requests will be considered.
 
@@ -84,6 +78,31 @@ To adapt to another version, please find the instructions in [ADAPTATION.md](ADA
 To upgrade to the latest WMPF (WeChat version > 4.x), download the latest WeChat installer on `pc.weixin.qq.com`. The latest WMPF bundle is packaged with the installer.
 
 To upgrade to the latest WMPF (WeChat version < 4.x), type in `:showcmdwnd` in the search bar (do not hit enter), then the command window should pop up. Type in `/plugin set_grayvalue=202&check_update_force` and hit enter, the latest WMPF plugin should be downloaded, if any updates are available. Restart the WeChat to apply plugin upgrade.
+
+To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EXTENSION.md). Note that this feature has many limitations currently and is simply a basic workaround.
+
+
+### Linux (X86_64) Support
+
+**Version histories:**
+
+* 14978 (latest, credit @Redbeanw44602)
+
+
+### macOS (arm64) Support
+
+**Version histories:**
+
+* 269136 (latest)
+
+
+To check WMPF version on macOS:
+
+```bash
+# Look for the last number in the version string
+grep CFBundleVersion -A 1 "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"
+```
+
 
 ## Prerequisites
 

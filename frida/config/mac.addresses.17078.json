@@ -1,0 +1,7 @@
+{
+    "Version": 17078,
+    "Platform": "mac",
+    "LoadStartHookOffset": "0x4F0620C",
+    "CDPFilterHookOffset": "0x81BFC04",
+    "SceneOffsets": [1432, 1376, 488]
+}

@@ -1,14 +1,24 @@
+const getPlatform = () => {
+    // retval: "windows" | "linux" | "darwin"
+    return Process.platform;
+}
+
+const isArmDarwin = () => {
+    return Process.platform === "darwin" && Process.arch === "arm64";
+}
+
 const getMainModule = (version) => {
-    const osPlatform = Process.platform
+    const osPlatform = getPlatform();
     if (osPlatform === 'windows') {
         if (version >= 13331) {
             return Process.findModuleByName("flue.dll");
         }
         return Process.findModuleByName("WeChatAppEx.exe");
-    } else if (osPlatform == 'linux') {
-        return Process.findModuleByName("WeChatAppEx")
+    } else if (osPlatform === 'linux') {
+        return Process.findModuleByName("WeChatAppEx");
+    } else if (osPlatform === 'darwin') {
+        return Process.findModuleByName("WeChatAppEx Framework");
     }
-
 };
 
 const patchCDPFilter = (base, config) => {
@@ -16,25 +26,44 @@ const patchCDPFilter = (base, config) => {
     const offset = config.CDPFilterHookOffset;
     Interceptor.attach(base.add(offset), {
         onEnter(args) {
-            send(
-                `[patch] CDP filter on enter, original value of input: ${args[0].readPointer()}`,
-            );
-            this.inputValue = args[0];
+            if (!isArmDarwin()) {
+                // x64 windows/linux: save args[0] for use in onLeave
+                send(
+                    `[patch] CDP filter on enter, original value of input: ${args[0].readPointer()}`,
+                );
+                this.inputValue = args[0];
+            }
         },
         onLeave(retval) {
-            const inputValue = this.inputValue.readPointer();
-            if (inputValue.isNull() || inputValue.add(8).isNull()) {
-                // there's a chance the value could be null
-                // return here to avoid crash
-                return;
-            }
+            if (!isArmDarwin()) {
+                // x64 windows/linux
+                const inputValue = this.inputValue.readPointer();
+                if (inputValue.isNull() || inputValue.add(8).isNull()) {
+                    // there's a chance the value could be null
+                    // return here to avoid crash
+                    return;
+                }
 
-            send(
-                `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
-                    `*(input + 8) = ${inputValue.add(8).readU32()}`,
-            );
-            if (inputValue.add(8).readU32() == 6) {
-                inputValue.add(8).writeU32(0x0);
+                send(
+                    `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
+                        `*(input + 8) = ${inputValue.add(8).readU32()}`,
+                );
+                if (inputValue.add(8).readU32() == 6) {
+                    inputValue.add(8).writeU32(0x0);
+                }
+            } else {
+                // arm64 darwin, caller checks retval+8 == 6, patch it to 0
+                if (retval.isNull()) return;
+                try {
+                    const val = retval.add(8).readU32();
+                    send(`[patch] CDP filter on leave (mac), retval+8 = ${val}`);
+                    if (val === 6) {
+                        retval.add(8).writeU32(0x0);
+                        send("[patch] CDP filter patched (mac)");
+                    }
+                } catch (e) {
+                    send(`[patch] CDP filter error: ${e}`);
+                }
             }
         },
     });
@@ -89,16 +118,26 @@ const patchOnLoadStart = (base, config) => {
     // xref: AppletIndexContainer::OnLoadStart
     Interceptor.attach(base.add(config.LoadStartHookOffset), {
         onEnter(args) {
+            // arm64 (darwin): x0=this, x1=debug_flag
+            // x64 (windows/linux): rcx=this, rdx=debug_flag
+            const thisPtr = isArmDarwin() ? this.context.x0 : this.context.rcx;
             send(
                 `[inteceptor] AppletIndexContainer::OnLoadStart onEnter, ` +
-                    `indexContainer.this: ${args[0]}`,
+                    `indexContainer.this: ${thisPtr}`,
             );
-            // write dl to 0x1
-            if (args[1].and(0xff).toInt32() !== 1) {
-                args[1] = args[1].and(ptr("0xffffffffffffff00")).or(1);
+            if (isArmDarwin()) {
+                // arm64 darwin: set x1 to 1
+                if ((this.context.x1.toInt32() & 0xff) !== 1) {
+                    this.context.x1 = ptr(1);
+                }
+            } else {
+                // x64 windows/linux: set dl to 1
+                if ((this.context.rdx & 0xff) !== 1) {
+                    this.context.rdx = (this.context.rdx & ~0xff) | 0x1;
+                }
             }
             // handle onLoad scene
-            hookOnLoadScene(args[0], config.SceneOffsets);
+            hookOnLoadScene(thisPtr, config.SceneOffsets);
         },
         onLeave(retval) {
             // do nothing
