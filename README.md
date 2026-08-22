@@ -9,7 +9,7 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 ## Support Status
 
-### Windows (X86_64) Support
+### Windows (x86_64) Support
 
 **Version histories:**
 
@@ -82,7 +82,7 @@ To upgrade to the latest WMPF (WeChat version < 4.x), type in `:showcmdwnd` in t
 To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EXTENSION.md). Note that this feature has many limitations currently and is simply a basic workaround.
 
 
-### Linux (X86_64) Support
+### Linux (x86_64) Support
 
 **Version histories:**
 

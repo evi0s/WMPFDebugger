@@ -7,7 +7,7 @@
 
 ## 支持状态
 
-### Windows (X86_64) 支持
+### Windows (x86_64) 支持
 
 **支持的 WMPF 版本：**
 
@@ -80,7 +80,7 @@
 
 如何更新到最新的 WMPF 版本（微信版本 < 4.x）：搜索框输入 `:showcmdwnd`（不要按回车触发搜索）弹出命令窗口，输入 `/plugin set_grayvalue=202&check_update_force` 并回车等待更新（如果有新版本）。重启微信以生效。
 
-### Linux (X86_64) 支持
+### Linux (x86_64) 支持
 
 **支持的 WMPF 版本：**
 
