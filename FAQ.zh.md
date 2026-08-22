@@ -93,6 +93,20 @@ yarn
 - 确认 WMPF 版本已被适配
 - 如果问题持续，尝试重启微信后再运行
 
+### Q: (macOS 特殊) 报错 Error: Unable to access process with pid xxx from the current user account
+
+这是 macOS 的 SIP 不允许 debug，有两种解决办法：
+
+1. (推荐) 对 WeChatAppEx framework 进行 Ad-Hoc 重签名：
+
+```bash
+sudo codesign --force --sign - \
+  --preserve-metadata=identifier,entitlements,requirements \
+  "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/MacOS/WeChatAppEx"
+```
+
+2. (不推荐) 关闭 SIP
+
 ---
 
 ## 调试问题

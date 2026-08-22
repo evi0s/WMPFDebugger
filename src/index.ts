@@ -142,7 +142,7 @@ const frida_server = async (options: CliOptions, logger: Logger) => {
     const { pid: wmpfPid, version: wmpfVersion } = await platform.findWmpfProcess()
 
     // attach to process
-    const session = await localDevice.attach(Number(wmpfPid));
+    const session = await localDevice.attach(wmpfPid);
 
     // find hook script
     const projectRoot = path.join(
