@@ -145,6 +145,17 @@ Please refer to [FAQ.zh.md](FAQ.zh.md) (Chinese only).
 Please READ THE FAQ CAREFULLY prior to submitting new issues!
 All newly submitted issues that have EXISTING SOLUTIONS in FAQ will be CLOSED WITHOUT ANY RESPONSE!
 
+## License & Attribution
+
+WMPFDebugger is licensed under the **GNU General Public License v2.0 (GPLv2)**.
+
+If you redistribute, modify, or publish a derivative version of this project, you **must comply with the GPLv2**, including preserving applicable copyright and license notices and fulfilling the GPLv2 source-code requirements when distributing covered binaries or modified versions.
+
+Please **do not remove existing attribution or contributor credits**. If your project is based on or derived from WMPFDebugger, we also ask that you clearly acknowledge **WMPFDebugger and its contributors** as the upstream project.
+
+> **GPLv2 compliance is a license requirement. Attribution beyond the requirements of the GPLv2 is respectfully requested in recognition of the work of all contributors.**
+
+
 ## Disclaimer
 
 BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
