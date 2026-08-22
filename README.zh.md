@@ -7,23 +7,40 @@
 
 ## 支持状态
 
-支持的 WMPF 版本 (macOS):
+### Windows (X86_64) 支持
 
-* 17078 / 微信 3.8.7 (macOS arm64, credit @dm)
+**支持的 WMPF 版本：**
 
-支持的 WMPF 版本 (Windows):
+* 25459 (最新, credit @1147529365)
+* 25364 (credit @lyratu)
+* 25297 (credit @Yinuo0602, @82539474)
+* 25268 (credit @RuntimeBroker)
+* 20089 (credit @lovejiuwu)
+* 20079 (credit @LiuYJia, @82539474)
 
-* 19459 (最新, credit @snowflake-x)
-* 19339 (credit @hidacow)
-* 19201 (credit @hidacow)
-* 19027 (credit @XKaguya)
-* 18955 (credit @MapleLeaf2007)
-* 18891 (credit @1357310795)
 
 <details>
 
 <summary>更早版本</summary>
 
+* 20005 (credit @LiuYJia)
+* 20001 (credit @B1397KB)
+* 19977 (credit @B1397KB, @yunm90872-ui, @chengzongcai)
+* 19921
+* 19899 (credit @mathmonkeyliu)
+* 19881 (credit @WIAIV)
+* 19871
+* 19841 (credit @AwangYes)
+* 19823 (credit @mathmonkeyliu)
+* 19769
+* 19749 (credit @xiaoriri, @Alfalfaaaa, @chengzongcai)
+* 19481 (credit @cosalone, @jiangjie)
+* 19459 (credit @snowflake-x)
+* 19339 (credit @hidacow)
+* 19201 (credit @hidacow)
+* 19027 (credit @XKaguya)
+* 18955 (credit @MapleLeaf2007)
+* 18891 (credit @1357310795)
 * 18787
 * 18151 (credit @1437649480, @zxjBigPower)
 * 18055 (credit @Howard20181)
@@ -52,6 +69,7 @@
 
 </details>
 
+
 如何调试微信内置浏览器页面：参见 [EXTENSION.md](EXTENSION.md)。注意，目前该方法仅有基础调试功能
 
 如何检查版本：打开任务管理器，找到 WeChatAppEx 进程，右键，打开文件所在的位置，检查在 `RadiumWMPF` 和 `extracted` 之间的数字。macOS 上执行 `grep CFBundleVersion "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"`，取版本字符串中最后一个数字
@@ -62,25 +80,24 @@
 
 如何更新到最新的 WMPF 版本（微信版本 < 4.x）：搜索框输入 `:showcmdwnd`（不要按回车触发搜索）弹出命令窗口，输入 `/plugin set_grayvalue=202&check_update_force` 并回车等待更新（如果有新版本）。重启微信以生效。
 
+### Linux (X86_64) 支持
 
-## macOS arm64 支持
+**支持的 WMPF 版本：**
 
-现已支持 macOS arm64 (Apple Silicon)。实现基于与 Windows 相同的 WMPF 内部机制，针对平台差异做了适配：
+* 14978 (最新, credit @Redbeanw44602)
 
-- 模块名：`WeChatAppEx Framework`（对应 Windows 的 `flue.dll`）
-- 寄存器约定：`x0` / `x1`（对应 Windows x64 的 `rcx` / `rdx`）
-- CDPFilter：修补 `retval+8`（对应 Windows 的 `*args[0]+8`）
-- 配置文件：`mac.addresses.{version}.json`（如 `mac.addresses.17078.json`）
+### macOS (arm64) 支持
 
-**如何在 macOS 上检查 WMPF 版本：**
+**支持的 WMPF 版本：**
+
+* 269136 (最新)
+
+如何检查版本：
 
 ```bash
-grep CFBundleVersion "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"
-# 查看版本字符串中的最后一个数字，如 6.17078 → 17078
+# 查看版本字符串的数字
+grep CFBundleVersion -A 1 "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"
 ```
-
-适配新版本：可使用 `frida/detect_offsets.js` 自动探测 hook 偏移量。
-
 
 ## 准备
 
@@ -116,17 +133,22 @@ npx ts-node src/index.ts
 
 ![Sources in DevTools](screenshots/sources.png)
 
+## 常见问题
+
+参见 [FAQ.zh.md](FAQ.zh.md)
+
+在提出新 Issue 前请**务必**阅读 FAQ。
+如果新 Issue 与 FAQ 中已有的问题重复，该 Issue 会被直接关闭且不会作出任何回复
+
 ## 免责声明
 
 **本库只能作为学习用途，造成的任何问题与本库开发者无关，如侵犯到你的权益，请联系删除**
 
 该程序以 GPLv2 许可证开源，参考许可证第十一及十二条：
 
-本程序为免费授权，故在适用法律范围内不提供品质担保。除非另作书面声明，版权持有人及其他程式提供者“概”不提供任何显式或隐式的品质担保，品质担保所指包括而不仅限于有经济价值和适合特定用途的保证。全部风险，如程序的质量和性能问题，皆由你承担。若程序出现缺陷，你将承担所有必要的修复和更正服务的费用
+本程序为免费授权，故在适用法律范围内不提供品质担保。除非另作书面声明，版权持有人及其他程序提供者“概”不提供任何显式或隐式的品质担保，品质担保所指包括而不仅限于有经济价值和适合特定用途的保证。全部风险，如程序的质量和性能问题，皆由你承担。若程序出现缺陷，你将承担所有必要的修复和更正服务的费用
 
 除非适用法律或书面协议要求，任何版权持有人或本程序按本协议可能存在的第三方修改和再发布者，都不对你的损失负有责任，包括由于使用或者不能使用本程序造成的任何一般的、特殊的、偶发的或重大的损失（包括而不仅限于数据丢失、数据失真、你或第三方的后续损失、其他程序无法与本程序协同运作），即使那些人声称会对此负责
 
 
 此外，在 `src/third-party` 中，所有代码从微信开发者工具提取，因此腾讯控股有限公司拥有对该代码的所有版权
-
-

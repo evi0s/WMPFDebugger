@@ -2,31 +2,46 @@
 
 [English](README.md) | [中文](README.zh.md)
 
-Yet another WeChat miniapp debugger on Windows / macOS (WMPF).
+Yet another WeChat Mini-Program Framework (WMPF) debugger.
 
 This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools and patches serval restrictions to force miniapp runtime to support full Chrome Debug Protocol, and thus can be directly applied to standard devtools shipped with chromium-based browsers.
 
 
 ## Support Status
 
+### Windows (X86_64) Support
 
-Version histories (macOS):
+**Version histories:**
 
-* 17078 / WeChat 3.8.7 (macOS arm64, credit @dm)
-
-Version histories (Windows):
-
-* 19459 (latest, credit @snowflake-x)
-* 19339 (credit @hidacow)
-* 19201 (credit @hidacow)
-* 19027 (credit @XKaguya)
-* 18955 (credit @MapleLeaf2007)
-* 18891 (credit @1357310795)
+* 25459 (latest, credit @1147529365)
+* 25364 (credit @lyratu)
+* 25297 (credit @Yinuo0602, @82539474)
+* 25268 (credit @RuntimeBroker)
+* 20089 (credit @lovejiuwu)
+* 20079 (credit @LiuYJia, @82539474)
 
 <details>
 
 <summary>Older versions</summary>
 
+* 20005 (credit @LiuYJia)
+* 20001 (credit @B1397KB)
+* 19977 (credit @B1397KB, @yunm90872-ui, @chengzongcai)
+* 19921
+* 19899 (credit @mathmonkeyliu)
+* 19881 (credit @WIAIV)
+* 19871
+* 19841 (credit @AwangYes)
+* 19823 (credit @mathmonkeyliu)
+* 19769
+* 19749 (credit @xiaoriri, @Alfalfaaaa, @chengzongcai)
+* 19481 (credit @cosalone, @jiangjie)
+* 19459 (credit @snowflake-x)
+* 19339 (credit @hidacow)
+* 19201 (credit @hidacow)
+* 19027 (credit @XKaguya)
+* 18955 (credit @MapleLeaf2007)
+* 18891 (credit @1357310795)
 * 18787
 * 18151 (credit @1437649480, @zxjBigPower)
 * 18055 (credit @Howard20181)
@@ -55,8 +70,6 @@ Version histories (Windows):
 
 </details>
 
-To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EXTENSION.md). Note that this feature has many limitations currently and is simply a basic workaround.
-
 To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`. On macOS, run `grep CFBundleVersion "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"` and use the last number in the version string.
 
 To adapt to another version, please find the instructions in [ADAPTATION.md](ADAPTATION.md). Alternatively, you can submit an issue for new version adaption and I will try that if I have the binary. Note that only newer version adaption requests will be considered.
@@ -66,24 +79,30 @@ To upgrade to the latest WMPF (WeChat version > 4.x), download the latest WeChat
 
 To upgrade to the latest WMPF (WeChat version < 4.x), type in `:showcmdwnd` in the search bar (do not hit enter), then the command window should pop up. Type in `/plugin set_grayvalue=202&check_update_force` and hit enter, the latest WMPF plugin should be downloaded, if any updates are available. Restart the WeChat to apply plugin upgrade.
 
+To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EXTENSION.md). Note that this feature has many limitations currently and is simply a basic workaround.
 
-## macOS arm64 Support
 
-macOS arm64 (Apple Silicon) is now supported. The implementation is based on the same WMPF internals as Windows, with platform-specific adaptations:
+### Linux (X86_64) Support
 
-- Module name: `WeChatAppEx Framework` (instead of `flue.dll` on Windows)
-- Register conventions: `x0` / `x1` (instead of `rcx` / `rdx` on Windows x64)
-- CDPFilter: patched at `retval+8` (instead of `*args[0]+8` on Windows)
-- Config file: `mac.addresses.{version}.json` (e.g. `mac.addresses.17078.json`)
+**Version histories:**
 
-**Check WMPF version on macOS:**
+* 14978 (latest, credit @Redbeanw44602)
+
+
+### macOS (arm64) Support
+
+**Version histories:**
+
+* 269136 (latest)
+
+
+To check WMPF version on macOS:
 
 ```bash
-grep CFBundleVersion "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"
-# Look for the last number in the version string, e.g. 6.17078 → 17078
+# Look for the last number in the version string
+grep CFBundleVersion -A 1 "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"
 ```
 
-For new version adaptation on macOS, you can use the Frida auto-detection script at `frida/detect_offsets.js` to find hook offsets automatically.
 
 ## Prerequisites
 
@@ -119,6 +138,13 @@ npx ts-node src/index.ts
 
 ![Sources in DevTools](screenshots/sources.png)
 
+## FAQ
+
+Please refer to [FAQ.zh.md](FAQ.zh.md) (Chinese only).
+
+Please READ THE FAQ CAREFULLY prior to submitting new issues!
+All newly submitted issues that have EXISTING SOLUTIONS in FAQ will be CLOSED WITHOUT ANY RESPONSE!
+
 ## Disclaimer
 
 BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
@@ -126,5 +152,3 @@ BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE PRO
 IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 The code in the `src/third-party` is extracted from `wechatdevtools` and fully copyrighted by Tencent Holdings Ltd.
-
-

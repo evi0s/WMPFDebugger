@@ -1,21 +1,33 @@
-const getMainModule = (version, platform) => {
-    if (platform === "mac") {
+const getPlatform = () => {
+    // retval: "windows" | "linux" | "darwin"
+    return Process.platform;
+}
+
+const isArmDarwin = () => {
+    return Process.platform === "darwin" && Process.arch === "arm64";
+}
+
+const getMainModule = (version) => {
+    const osPlatform = getPlatform();
+    if (osPlatform === 'windows') {
+        if (version >= 13331) {
+            return Process.findModuleByName("flue.dll");
+        }
+        return Process.findModuleByName("WeChatAppEx.exe");
+    } else if (osPlatform === 'linux') {
+        return Process.findModuleByName("WeChatAppEx");
+    } else if (osPlatform === 'darwin') {
         return Process.findModuleByName("WeChatAppEx Framework");
     }
-    if (version >= 13331) {
-        return Process.findModuleByName("flue.dll");
-    }
-    return Process.findModuleByName("WeChatAppEx.exe");
 };
 
 const patchCDPFilter = (base, config) => {
     // xref: SendToClientFilter OR devtools_message_filter_applet_webview.cc
-    const isMac = config.Platform === "mac";
     const offset = config.CDPFilterHookOffset;
     Interceptor.attach(base.add(offset), {
         onEnter(args) {
-            if (!isMac) {
-                // x64 windows: save args[0] for use in onLeave
+            if (!isArmDarwin()) {
+                // x64 windows/linux: save args[0] for use in onLeave
                 send(
                     `[patch] CDP filter on enter, original value of input: ${args[0].readPointer()}`,
                 );
@@ -23,8 +35,24 @@ const patchCDPFilter = (base, config) => {
             }
         },
         onLeave(retval) {
-            if (isMac) {
-                // arm64 mac: caller checks retval+8 == 6, patch it to 0
+            if (!isArmDarwin()) {
+                // x64 windows/linux
+                const inputValue = this.inputValue.readPointer();
+                if (inputValue.isNull() || inputValue.add(8).isNull()) {
+                    // there's a chance the value could be null
+                    // return here to avoid crash
+                    return;
+                }
+
+                send(
+                    `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
+                        `*(input + 8) = ${inputValue.add(8).readU32()}`,
+                );
+                if (inputValue.add(8).readU32() == 6) {
+                    inputValue.add(8).writeU32(0x0);
+                }
+            } else {
+                // arm64 darwin, caller checks retval+8 == 6, patch it to 0
                 if (retval.isNull()) return;
                 try {
                     const val = retval.add(8).readU32();
@@ -36,19 +64,6 @@ const patchCDPFilter = (base, config) => {
                 } catch (e) {
                     send(`[patch] CDP filter error: ${e}`);
                 }
-            } else {
-                // x64 windows: patch *args[0]+8
-                const inputValue = this.inputValue.readPointer();
-                if (inputValue.isNull() || inputValue.add(8).isNull()) {
-                    return;
-                }
-                send(
-                    `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
-                        `*(input + 8) = ${inputValue.add(8).readU32()}`,
-                );
-                if (inputValue.add(8).readU32() == 6) {
-                    inputValue.add(8).writeU32(0x0);
-                }
             }
         },
     });
@@ -56,18 +71,18 @@ const patchCDPFilter = (base, config) => {
 
 const hookOnLoadScene = (a1, sceneOffsets) => {
     const miniappConfigPtr = a1
-        .add(56)
-        .readPointer()
         .add(sceneOffsets[0])
-        .readPointer();
-    const miniappScenePtr = miniappConfigPtr
-        .add(8)
         .readPointer()
         .add(sceneOffsets[1])
+        .readPointer();
+    const miniappScenePtr = miniappConfigPtr
+        .add(sceneOffsets[2])
         .readPointer()
-        .add(16)
+        .add(sceneOffsets[3])
         .readPointer()
-        .add(sceneOffsets[2]);
+        .add(sceneOffsets[4])
+        .readPointer()
+        .add(sceneOffsets[5]);
     send(`[hook] scene: ${miniappScenePtr.readInt()}`);
 
     // 1000: from issue #83 <-- will crash the process
@@ -101,23 +116,22 @@ const hookOnLoadScene = (a1, sceneOffsets) => {
 
 const patchOnLoadStart = (base, config) => {
     // xref: AppletIndexContainer::OnLoadStart
-    const isMac = config.Platform === "mac";
     Interceptor.attach(base.add(config.LoadStartHookOffset), {
         onEnter(args) {
-            // arm64 (mac): x0=this, x1=debug_flag
-            // x64 (windows): rcx=this, rdx=debug_flag
-            const thisPtr = isMac ? this.context.x0 : this.context.rcx;
+            // arm64 (darwin): x0=this, x1=debug_flag
+            // x64 (windows/linux): rcx=this, rdx=debug_flag
+            const thisPtr = isArmDarwin() ? this.context.x0 : this.context.rcx;
             send(
                 `[inteceptor] AppletIndexContainer::OnLoadStart onEnter, ` +
                     `indexContainer.this: ${thisPtr}`,
             );
-            if (isMac) {
-                // arm64: set x1 (debug flag) to 1
+            if (isArmDarwin()) {
+                // arm64 darwin: set x1 to 1
                 if ((this.context.x1.toInt32() & 0xff) !== 1) {
                     this.context.x1 = ptr(1);
                 }
             } else {
-                // x64: write dl to 0x1
+                // x64 windows/linux: set dl to 1
                 if ((this.context.rdx & 0xff) !== 1) {
                     this.context.rdx = (this.context.rdx & ~0xff) | 0x1;
                 }
@@ -147,13 +161,9 @@ const parseConfig = () => {
 
 const main = () => {
     const config = parseConfig();
-    const mainModule = getMainModule(config.Version, config.Platform);
+    const mainModule = getMainModule(config.Version);
     patchOnLoadStart(mainModule.base, config);
-    if (!config.DisableCDPFilter) {
-        patchCDPFilter(mainModule.base, config);
-    } else {
-        send("[info] CDPFilter hook disabled");
-    }
+    patchCDPFilter(mainModule.base, config);
 };
 
 main();

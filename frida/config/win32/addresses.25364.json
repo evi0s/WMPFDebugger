@@ -1,0 +1,6 @@
+{
+    "Version": 25364,
+    "LoadStartHookOffset": "0x2a85700",
+    "CDPFilterHookOffset": "0x391c200",
+    "SceneOffsets": [64, 1512, 8, 1448, 16, 456]
+}

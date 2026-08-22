@@ -1,10 +1,10 @@
 import { promises } from "node:fs";
-import { execSync } from "node:child_process";
 import { EventEmitter } from "node:events";
 import path from "node:path";
 import * as frida from "frida";
 import WebSocket, { WebSocketServer } from "ws";
 
+import { platform } from "./platform";
 import { parse_cli_options, CliOptions } from "./cli";
 import { create_logger, Logger } from "./logger";
 
@@ -21,7 +21,7 @@ const bufferToHexString = (buffer: ArrayBuffer) => {
         .join("");
 };
 
-const debug_server = (options: CliOptions, logger: Logger): WebSocketServer => {
+const debug_server = (options: CliOptions, logger: Logger) => {
     const wss = new WebSocketServer({ port: options.debugPort });
     logger.info(
         `[server] debug server running on ws://localhost:${options.debugPort}`,
@@ -100,11 +100,9 @@ const debug_server = (options: CliOptions, logger: Logger): WebSocketServer => {
                 }
             });
     });
-
-    return wss;
 };
 
-const proxy_server = (options: CliOptions, logger: Logger): WebSocketServer => {
+const proxy_server = (options: CliOptions, logger: Logger) => {
     const wss = new WebSocketServer({ port: options.cdpPort });
     logger.info(
         `[server] proxy server running on ws://localhost:${options.cdpPort}`,
@@ -137,89 +135,11 @@ const proxy_server = (options: CliOptions, logger: Logger): WebSocketServer => {
                 }
             });
     });
-
-    return wss;
 };
 
-const frida_server = async (options: CliOptions, logger: Logger): Promise<frida.Session> => {
-    const isMac = require("node:os").platform() === "darwin";
+const frida_server = async (options: CliOptions, logger: Logger) => {
     const localDevice = await frida.getLocalDevice();
-    const processes = await localDevice.enumerateProcesses({
-        scope: frida.Scope.Metadata,
-    });
-
-    let wmpfPid: number | undefined;
-
-    if (isMac) {
-        // mac: enumerateProcesses can't see WeChatAppEx main process due to sandbox
-        // find it via ppid of WeChatAppEx Helper processes
-        const helperProcess = processes.find(
-            (p) => p.name === "WeChatAppEx Helper" && p.parameters.ppid,
-        );
-        if (!helperProcess) {
-            throw new Error("[frida] WeChatAppEx Helper process not found (mac)");
-        }
-        wmpfPid = helperProcess.parameters.ppid as number;
-        logger.info(`[frida] mac: found WeChatAppEx pid=${wmpfPid} (via Helper ppid)`);
-    } else {
-        // windows: find parent of WeChatAppEx.exe
-        const wmpfProcesses = processes.filter(
-            (process) => process.name === "WeChatAppEx.exe",
-        );
-        const wmpfPids = wmpfProcesses.map((p) =>
-            p.parameters.ppid ? (p.parameters.ppid as number) : 0,
-        );
-        wmpfPid = wmpfPids
-            .sort(
-                (a, b) =>
-                    wmpfPids.filter((v) => v === a).length -
-                    wmpfPids.filter((v) => v === b).length,
-            )
-            .pop();
-        if (wmpfPid === undefined) {
-            throw new Error("[frida] WeChatAppEx.exe process not found");
-        }
-    }
-
-    const wmpfProcess = processes.find((p) => p.pid === wmpfPid);
-    const wmpfProcessPath = wmpfProcess?.parameters.path as string | undefined;
-
-    // determine config filename
-    let configFileName: string;
-    if (isMac) {
-        // mac: extract WMPF version from Info.plist
-        // CFBundleVersion format: "6.17078" → 17078
-        const plistPath =
-            "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist";
-        let wmpfVersion = 0;
-        try {
-            const plistRaw = execSync(
-                `grep -A1 CFBundleVersion "${plistPath}" | grep string`,
-            ).toString();
-            const versionMatch = plistRaw.match(/>([^<]*\.(\d+))</);
-            wmpfVersion = versionMatch ? Number(versionMatch[2]) : 0;
-        } catch (e) {
-            // ignore
-        }
-        if (wmpfVersion === 0) {
-            throw new Error(
-                `[frida] mac: failed to extract WMPF version from ${plistPath}`,
-            );
-        }
-        configFileName = `mac.addresses.${wmpfVersion}.json`;
-        logger.info(`[frida] mac: WMPF version=${wmpfVersion} (from Info.plist)`);
-    } else {
-        const wmpfVersionMatch = wmpfProcessPath
-            ? wmpfProcessPath.match(/\d+/g)
-            : "";
-        const wmpfVersion = wmpfVersionMatch
-            ? new Number(wmpfVersionMatch.pop())
-            : 0;
-        if (wmpfVersion === 0) {
-            throw new Error("[frida] error in find wmpf version");
-        }
-        configFileName = `addresses.${wmpfVersion}.json`;
-    }
+    const { pid: wmpfPid, version: wmpfVersion } = await platform.findWmpfProcess()
 
     // attach to process
     const session = await localDevice.attach(Number(wmpfPid));
@@ -246,12 +166,16 @@ const frida_server = async (options: CliOptions, logger: Logger): Promise<frida.
     try {
         configContent = (
             await promises.readFile(
-                path.join(projectRoot, "frida/config", configFileName),
+                path.join(
+                    projectRoot,
+                    `frida/config/${process.platform}`,
+                    `addresses.${wmpfVersion}.json`,
+                ),
             )
         ).toString();
         configContent = JSON.stringify(JSON.parse(configContent));
     } catch (e) {
-        throw new Error(`[frida] version config not found: ${configFileName}`);
+        throw new Error(`[frida] version config not found: ${wmpfVersion}`);
     }
 
     if (scriptContent === null || configContent === null) {
@@ -272,27 +196,17 @@ const frida_server = async (options: CliOptions, logger: Logger): Promise<frida.
     });
     await script.load();
     logger.info(
-        `[frida] script loaded, config: ${configFileName}, pid: ${wmpfPid}`,
+        `[frida] script loaded, WMPF version: ${wmpfVersion}, pid: ${wmpfPid}`,
     );
     logger.info(`[frida] you can now open any miniapps`);
-
-    return session;
 };
 
 const main = async () => {
     const options = parse_cli_options();
     const logger = create_logger(options);
-    const debugWss = debug_server(options, logger);
-    const proxyWss = proxy_server(options, logger);
-    const session = await frida_server(options, logger);
-
-    process.on("SIGINT", async () => {
-        logger.info("[server] shutting down...");
-        debugWss.close();
-        proxyWss.close();
-        await session.detach();
-        process.exit(0);
-    });
+    debug_server(options, logger);
+    proxy_server(options, logger);
+    frida_server(options, logger);
 };
 
 (async () => {
