@@ -7,6 +7,8 @@ Also, PR welcome!
 
 ## Prerequisites
 
+### Windows
+
 You need to locate the folder which contains `WeChatAppEx.exe`, for newer versions, it will be something like 
 
 ```
@@ -17,25 +19,38 @@ where the 19339 indicates the version number.
 
 Use IDA to open `flue.dll` inside this folder (for much older versions, open `WeChatAppEx.exe`)
 
-**Please wait for the loading patiently, or the strings/cross reference views will be incomplete and you cannot locate the offset.**
+### Linux
+
+Depending on your distribution's packaging policy, the path may vary.
+
+```bash
+readlink /proc/$(pidof WeChatAppEx | awk '{print $1}')/exe
+```
+
+Analyze `WeChatAppEx` using IDA.
+
+> [!WARNING]
+> Do not continue with any actions until the indicator in the lower-left corner of IDA displays `AU: idle`.
 
 ## LoadStartHookOffset
 
-**(Starting from version 18891)** Please search `OnLoadStart` (camel-case) and find the x-ref function that references a string contains `applet_index_container.cc`. Possibly `sub_18xxxxxxx+E6`
+### Windows (>=18891)
+
+Please search `OnLoadStart` (camel-case) and find the x-ref function that references a string contains `applet_index_container.cc`. Possibly `sub_18xxxxxxx+E6`
 
 ![OnLoadStartHook.Extra.1](./screenshots/adaptation/onload_start_hook.extra.1.png)
 
-> If you cannot find something similar to the picture below, and you can only see something like `.rdata:000000018AB7A3E4                 db  4Fh ; O` , this means the loading is not complete, please wait.
+If you cannot find something similar to the picture below, and you can only see something like `.rdata:000000018AB7A3E4                 db  4Fh ; O` , this means the loading is not complete, please wait.
 
 ![OnLoadStartHook.Extra.2](./screenshots/adaptation/onload_start_hook.extra.2.png)
 
-> To show the Pseudocode like below, press F5
+To show the Pseudocode like below, press F5
 
 ![OnLoadStartHook.Extra.3](./screenshots/adaptation/onload_start_hook.extra.3.png)
 
 If you found `sub_1825B50C0` (as shown in the above example) matches the pattern in the picture above, then you can fill in 
 
-```
+```json
 {
     "Version": xxx,
     "LoadStartHookOffset": "0x25B50C0",
@@ -46,7 +61,7 @@ Scroll down to the bottom of the pseudocode of this function and you will find s
 
 (version 19339 example)
 
-```cpp
+```c
  if ( (_BYTE)a2 )
     result = sub_182B02350(*(_QWORD *)(*(_QWORD *)(a1 + 56) + 1376LL), *(_QWORD *)(*(_QWORD *)(a1 + 80) + 56LL));
   if ( ((unsigned __int64)v19 ^ v27) != _security_cookie )
@@ -57,17 +72,11 @@ Scroll down to the bottom of the pseudocode of this function and you will find s
   return result;
 ```
 
-You will find the magic number `1376LL`, this is the first param of the SceneOffsets
-
-```json
-"SceneOffsets": [1376, ?, ?]
-```
-
-Double click and navigate to the function which contains that number ( `sub_182B02350` in the example above)
+We are interested in functions that are executed only when `a2` is true, so please go to `sub_182B02350`.
 
 You will find something like 
 
-```cpp
+```c
 result = *(_QWORD *)(a1 + 8);
   if ( *(_DWORD *)(*(_QWORD *)(*(_QWORD *)(result + 1312) + 16LL) + 456LL) != 1101 && *(_BYTE *)(a1 + 41) != 1 )
     goto LABEL_32;
@@ -80,24 +89,47 @@ result = *(_QWORD *)(a1 + 8);
   ws:__localhost:9421 = (char *)&ws:__localhost:9421_1;
 ```
 
-The number `1312`  and `456` is what we need for the rest of SceneOffsets
+The magic number `1101` is what we need. We need to tell the script how to access `1101` through multiple layers of pointer offsets and dereferencing. Please refer to the code in `hook.js`:
 
-```json
-"SceneOffsets": [1376, 1312, 456]
+```javascript
+const miniappConfigPtr = a1
+    .add(sceneOffsets[0])
+    .readPointer()
+    .add(sceneOffsets[1])
+    .readPointer();
+const miniappScenePtr = miniappConfigPtr
+    .add(sceneOffsets[2])
+    .readPointer()
+    .add(sceneOffsets[3])
+    .readPointer()
+    .add(sceneOffsets[4])
+    .readPointer()
+    .add(sceneOffsets[5]);
 ```
 
-> **(For old version 14199 as an example)** Locate the `AppletIndexContainer::OnLoadStart` function by searching `[perf] AppletIndexContainer::OnLoadStart`
+Based on the pattern of the first argument passed to `sub_182B02350`, the `result`, and the `if` statement block, overall `(*(_QWORD *)(a1 + 56) + 1376LL) -> result = *(_QWORD *)(a1 + 8); -> (*(_QWORD *)(*(_QWORD *)(result + 1312) + 16LL) + 456LL)`,  the answer is:
+
+```json
+"SceneOffsets": [56, 1376, 8, 1312, 16, 456]
+```
+
+### Linux, Windows (>=14199, Old Version)
+
+Locate the `AppletIndexContainer::OnLoadStart` function by searching `[Perf] AppletIndexContainer::OnLoadStart`
 in strings.
->
-> ![OnLoadStartHook.1](./screenshots/adaptation/onload_start_hook.1.png)
->
-> Hit `x`, the only x-ref function address is the offset.
->
-> ![OnLoadStartHook.2](./screenshots/adaptation/onload_start_hook.2.png)**Note: 
->
+
+![OnLoadStartHook.1](./screenshots/adaptation/onload_start_hook.1.png)
+
+Hit `x`, the only x-ref function address is the offset.
+
+![OnLoadStartHook.2](./screenshots/adaptation/onload_start_hook.2.png)
+
+How to find SceneOffsets? Please refer to the section above.
+
+> [!NOTE]
 > Also, check the struct offset in these two marked functions.
 > These offsets are being used in the `onLoadStartHook` function in [frida/hook.js](frida/hook.js)
->
+> 
 > ![OnLoadStartHook.3](./screenshots/adaptation/onload_start_hook.3.png)
 
 ## CDPFilterHookOffset
@@ -116,7 +148,7 @@ function called in the x-refed function `sub_181DB82D0`.
 
 ![CDPFilterHook.3](./screenshots/adaptation/cdp_filter_hook.3.png)
 
-```
+```json
 "CDPFilterHookOffset": "0x24839E0",
 ```
 
@@ -124,7 +156,7 @@ function called in the x-refed function `sub_181DB82D0`.
 
 Save `addresses.xxxxx.json` in frida/config with the params you found above where `xxxxx` is the new version
 
-```
+```json
 {
     "Version": xxxxx,
     "LoadStartHookOffset": "0x25B5DD0",
@@ -151,6 +183,3 @@ is the target function.
 
 
 ![ResourceCacheHook.2](./screenshots/adaptation/resource_cache_hook.2.png)
-
-
-
