@@ -3,10 +3,6 @@ const getPlatform = () => {
     return Process.platform;
 }
 
-const isArmDarwin = () => {
-    return Process.platform === "darwin" && Process.arch === "arm64";
-}
-
 const getMainModule = (version) => {
     const osPlatform = getPlatform();
     if (osPlatform === 'windows') {
@@ -22,63 +18,26 @@ const getMainModule = (version) => {
 };
 
 const patchCDPFilter = (base, config) => {
-    if (config.CastToJsonOffset) {
-        const castToJson = new NativeFunction(
-            base.add(config.CastToJsonOffset),
-            "pointer",
-            ["pointer", "pointer", "pointer"]
-        );
-        const callback = new NativeCallback(function (out, thiz, data, len) {
-            castToJson(out, data, len)
-            return out
-        }, "pointer", ["pointer", "pointer", "pointer", "pointer"]);
-        Interceptor.replace(base.add(config.CDPFilterHookOffset), callback);
-        return;
-    }
     // xref: SendToClientFilter OR devtools_message_filter_applet_webview.cc
     const offset = config.CDPFilterHookOffset;
     Interceptor.attach(base.add(offset), {
-        onEnter(args) {
-            if (!isArmDarwin()) {
-                // x64 windows/linux: save args[0] for use in onLeave
-                send(
-                    `[patch] CDP filter on enter, original value of input: ${args[0].readPointer()}`,
-                );
-                this.inputValue = args[0];
-            }
-        },
         onLeave(retval) {
-            if (!isArmDarwin()) {
-                // x64 windows/linux
-                const inputValue = this.inputValue.readPointer();
-                if (inputValue.isNull() || inputValue.add(8).isNull()) {
-                    // there's a chance the value could be null
-                    // return here to avoid crash
-                    return;
-                }
-
-                send(
-                    `[patch] CDP filter on leave, patch input, now value: ${inputValue}; ` +
-                        `*(input + 8) = ${inputValue.add(8).readU32()}`,
-                );
-                if (inputValue.add(8).readU32() == 6) {
-                    inputValue.add(8).writeU32(0x0);
-                }
-            } else {
-                // arm64 darwin, caller checks retval+8 == 6, patch it to 0
-                if (retval.isNull()) return;
-                try {
-                    const val = retval.add(8).readU32();
-                    send(`[patch] CDP filter on leave (mac), retval+8 = ${val}`);
-                    if (val === 6) {
-                        retval.add(8).writeU32(0x0);
-                        send("[patch] CDP filter patched (mac)");
-                    }
-                } catch (e) {
-                    send(`[patch] CDP filter error: ${e}`);
-                }
+            // see https://github.com/evi0s/WMPFDebugger/pull/262
+            if (getPlatform() == 'windows') {
+                retval = retval.readPointer()
             }
-        },
+            if (retval.isNull()) return;
+            try {
+                const val = retval.add(8).readU32();
+                send(`[patch] CDP filter on leave, retval+8 = ${val}`);
+                if (val === 6) {
+                    retval.add(8).writeU32(0x0);
+                    send("[patch] CDP filter patched");
+                }
+            } catch (e) {
+                send(`[patch] CDP filter error: ${e}`);
+            }
+        }
     });
 };
 
