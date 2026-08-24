@@ -21,11 +21,11 @@ const patchCDPFilter = (base, config) => {
     // xref: SendToClientFilter OR devtools_message_filter_applet_webview.cc
     const offset = config.CDPFilterHookOffset;
     Interceptor.attach(base.add(offset), {
-        onLeave(retval) {
+        onLeave(retval_) {
             // see https://github.com/evi0s/WMPFDebugger/pull/262
-            if (getPlatform() == 'windows') {
-                retval = retval.readPointer()
-            }
+            const retval = getPlatform() == 'windows'
+                ? retval_.readPointer()
+                : retval_;
             if (retval.isNull()) return;
             try {
                 const val = retval.add(8).readU32();
