@@ -11,7 +11,8 @@
 
 **支持的 WMPF 版本：**
 
-* 25459 (最新, credit @1147529365)
+* 25510 (最新, credit @potacotion)
+* 25459 (credit @1147529365)
 * 25364 (credit @lyratu)
 * 25297 (credit @Yinuo0602, @82539474)
 * 25268 (credit @RuntimeBroker)
