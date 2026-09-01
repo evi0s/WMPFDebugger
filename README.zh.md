@@ -91,7 +91,8 @@
 
 **支持的 WMPF 版本：**
 
-* 269136 (最新)
+* 6.25529（最新, 官网下载版，credit @YanAnHuaZai）
+* 269136（最新, 苹果应用商店版）
 
 如何检查版本：
 
@@ -99,6 +100,23 @@
 # 查看版本字符串的数字
 grep CFBundleVersion -A 1 "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"
 ```
+
+首次在 macOS 上运行调试器前，请彻底退出微信，并对 `WeChatAppEx` 可执行文件进行 Ad-Hoc 重签名。这样无需关闭系统完整性保护（SIP），Frida 也可以附加到该进程：
+
+```bash
+sudo codesign --force --sign - \
+  --preserve-metadata=identifier,entitlements,requirements \
+  "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/MacOS/WeChatAppEx"
+```
+
+验证签名：
+
+```bash
+codesign --verify --strict --verbose=4 \
+  "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/MacOS/WeChatAppEx"
+```
+
+重新启动微信后，请使用普通用户运行调试器。使用 `sudo` 执行 `npx ts-node src/index.ts` 并不能绕过目标进程的代码签名限制。更新或重新安装微信后，可能需要再次执行 Ad-Hoc 签名。
 
 ## 准备
 
