@@ -94,7 +94,8 @@ To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EX
 
 **Version histories:**
 
-* 269136 (latest)
+* 6.25529 (latest, official download, credit @YanAnHuaZai)
+* 269136 (latest, Mac App Store)
 
 
 To check WMPF version on macOS:
@@ -103,6 +104,23 @@ To check WMPF version on macOS:
 # Look for the number in the version string
 grep CFBundleVersion -A 1 "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Info.plist"
 ```
+
+Before running the debugger on macOS for the first time, quit WeChat completely and apply an Ad-Hoc signature to the `WeChatAppEx` executable. This allows Frida to attach to the process without disabling System Integrity Protection (SIP):
+
+```bash
+sudo codesign --force --sign - \
+  --preserve-metadata=identifier,entitlements,requirements \
+  "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/MacOS/WeChatAppEx"
+```
+
+Verify the signature:
+
+```bash
+codesign --verify --strict --verbose=4 \
+  "/Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/MacOS/WeChatAppEx"
+```
+
+Restart WeChat, then run the debugger as your normal user. Running `npx ts-node src/index.ts` with `sudo` does not bypass the target process's code-signing restrictions. You may need to repeat the Ad-Hoc signing step after updating or reinstalling WeChat.
 
 
 ## Prerequisites
