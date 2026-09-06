@@ -18,34 +18,24 @@ export class LinuxPlatform implements IPlatform {
         const processes = await localDevice.enumerateProcesses({
             scope: frida.Scope.Metadata,
         });
-        const wmpfProcesses = processes.filter(
-            (process) => process.name === "WeChatAppEx",
-        );
-        const wmpfPids = wmpfProcesses.map((p) =>
-            p.parameters.ppid ? p.parameters.ppid : 0,
-        );
 
-        // find the parent process
-        const wmpfPid = wmpfPids
-            .sort(
-                (a, b) =>
-                    wmpfPids.filter((v) => v === a).length -
-                    wmpfPids.filter((v) => v === b).length,
-            )
-            .pop();
-        if (wmpfPid === undefined) {
-            throw new Error("[frida] WeChatAppEx process not found");
+        const allWmpf = processes.filter(p => p.name === "WeChatAppEx");
+        for (const proc of allWmpf) {
+            const ppid = proc.parameters.ppid;
+            if (!ppid) continue;
+            const parent = processes.find(p => p.pid === ppid);
+            if (parent && parent.name !== "WeChatAppEx") {
+                const wmpfProcessPath = proc.parameters.path as string | undefined;
+                const wmpfVersion = wmpfProcessPath
+                    ? searchWmpfVersionInFile(wmpfProcessPath)
+                    : 0;
+                if (wmpfVersion === 0) {
+                    throw new Error("[frida] error in find wmpf version");
+                }
+                return { pid: proc.pid, version: wmpfVersion };
+            }
         }
-        const wmpfProcess = processes.filter(
-            (process) => process.pid === wmpfPid,
-        )[0];
-        const wmpfProcessPath = wmpfProcess.parameters.path as string | undefined;
-        const wmpfVersion = wmpfProcessPath
-            ? searchWmpfVersionInFile(wmpfProcessPath)
-            : 0;
-        if (wmpfVersion === 0) {
-            throw new Error("[frida] error in find wmpf version");
-        }
-        return { pid: Number(wmpfPid), version: wmpfVersion };
+
+        throw new Error("[frida] WeChatAppEx root process not found");
     }
 }
