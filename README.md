@@ -13,18 +13,20 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 **Version histories:**
 
-* 25510 (latest, credit @potacotion)
+* **auto-detect** (beta, credit @GhostMice)
+* 25558 (latest, credit @potacotion, @bingkxu)
+* 25510 (credit @potacotion)
 * 25459 (credit @1147529365)
 * 25364 (credit @lyratu)
 * 25297 (credit @Yinuo0602, @82539474)
 * 25268 (credit @RuntimeBroker)
-* 20089 (credit @lovejiuwu)
-* 20079 (credit @LiuYJia, @82539474)
 
 <details>
 
 <summary>Older versions</summary>
 
+* 20089 (credit @lovejiuwu)
+* 20079 (credit @LiuYJia, @82539474)
 * 20005 (credit @LiuYJia)
 * 20001 (credit @B1397KB)
 * 19977 (credit @B1397KB, @yunm90872-ui, @chengzongcai)
@@ -71,6 +73,8 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 </details>
 
+To use auto-detect feature (currently beta), simply add `--auto-detect` in your launch arguments
+
 To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`.
 
 To adapt to another version, please find the instructions in [ADAPTATION.md](ADAPTATION.md). Alternatively, you can submit an issue for new version adaption and I will try that if I have the binary. Note that only newer version adaption requests will be considered.
@@ -88,6 +92,7 @@ To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EX
 **Version histories:**
 
 * 14978 (latest, credit @Redbeanw44602)
+* 14910 (credit @CCLL-0x01)
 
 
 ### macOS (arm64) Support

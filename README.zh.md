@@ -11,19 +11,21 @@
 
 **支持的 WMPF 版本：**
 
-* 25510 (最新, credit @potacotion)
+* **自动检测** (Beta 测试, credit @GhostMice)
+* 25558 (最新, credit @potacotion, @bingkxu)
+* 25510 (credit @potacotion)
 * 25459 (credit @1147529365)
 * 25364 (credit @lyratu)
 * 25297 (credit @Yinuo0602, @82539474)
 * 25268 (credit @RuntimeBroker)
-* 20089 (credit @lovejiuwu)
-* 20079 (credit @LiuYJia, @82539474)
 
 
 <details>
 
 <summary>更早版本</summary>
 
+* 20089 (credit @lovejiuwu)
+* 20079 (credit @LiuYJia, @82539474)
 * 20005 (credit @LiuYJia)
 * 20001 (credit @B1397KB)
 * 19977 (credit @B1397KB, @yunm90872-ui, @chengzongcai)
@@ -70,6 +72,7 @@
 
 </details>
 
+如何使用自动偏移检测：添加 `--auto-detect` 命令行参数。当前仅支持 Windows x86_64，且尚未测试稳定性
 
 如何调试微信内置浏览器页面：参见 [EXTENSION.md](EXTENSION.md)。注意，目前该方法仅有基础调试功能
 
@@ -86,6 +89,7 @@
 **支持的 WMPF 版本：**
 
 * 14978 (最新, credit @Redbeanw44602)
+* 14910 (credit, @CCLL-0x01)
 
 ### macOS (arm64) 支持
 

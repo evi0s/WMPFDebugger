@@ -13,6 +13,13 @@ const messageProto = require("./third-party/WARemoteDebugProtobuf.js");
 
 class DebugMessageEmitter extends EventEmitter {}
 
+type HookConfig = {
+    Version: number;
+    LoadStartHookOffset: string;
+    CDPFilterHookOffset: string;
+    SceneOffsets: number[];
+};
+
 const debugMessageEmitter = new DebugMessageEmitter();
 
 const bufferToHexString = (buffer: ArrayBuffer) => {
@@ -139,6 +146,65 @@ const proxyServer = (options: CliOptions, logger: Logger): WebSocketServer => {
     return wss;
 };
 
+const autoDetectConfig = async (
+    session: frida.Session,
+    projectRoot: string,
+    wmpfVersion: number,
+): Promise<HookConfig> => {
+    let detectorContent: string;
+    try {
+        detectorContent = (
+            await promises.readFile(
+                path.join(
+                    projectRoot,
+                    "frida/autodetect",
+                    `${process.platform}.js`,
+                ),
+            )
+        ).toString();
+    } catch (e) {
+        throw new Error("[frida] auto-detect script not found");
+    }
+
+    const detector = await session.createScript(detectorContent);
+    const detectedConfig = new Promise<Omit<HookConfig, "Version">>(
+        (resolve, reject) => {
+            detector.message.connect((message: frida.Message) => {
+                if (message.type === "error") {
+                    reject(
+                        new Error(
+                            `[frida] auto-detect failed: ${message.description}`,
+                        ),
+                    );
+                    return;
+                }
+
+                const payload = message.payload as {
+                    type?: string;
+                    config?: Omit<HookConfig, "Version">;
+                    error?: string;
+                };
+                if (payload.type === "wmpf-offsets" && payload.config) {
+                    resolve(payload.config);
+                } else if (payload.type === "wmpf-offsets-error") {
+                    reject(
+                        new Error(
+                            `[frida] auto-detect failed: ${payload.error ?? "unknown error"}`,
+                        ),
+                    );
+                }
+            });
+        },
+    );
+
+    try {
+        await detector.load();
+        return { Version: wmpfVersion, ...(await detectedConfig) };
+    } finally {
+        await detector.unload();
+    }
+};
+
 const fridaServer = async (options: CliOptions, logger: Logger): Promise<frida.Session> => {
     const localDevice = await frida.getLocalDevice();
     const { pid: wmpfPid, version: wmpfVersion } = await platform.findWmpfProcess()
@@ -165,19 +231,26 @@ const fridaServer = async (options: CliOptions, logger: Logger): Promise<frida.S
     }
 
     let configContent: string | null = null;
-    try {
-        configContent = (
-            await promises.readFile(
-                path.join(
-                    projectRoot,
-                    `frida/config/${process.platform}`,
-                    `addresses.${wmpfVersion}.json`,
-                ),
-            )
-        ).toString();
-        configContent = JSON.stringify(JSON.parse(configContent));
-    } catch (e) {
-        throw new Error(`[frida] version config not found: ${wmpfVersion}`);
+    if (options.autoDetect) {
+        logger.info(`[frida] auto-detecting hook offsets...`);
+        const config = await autoDetectConfig(session, projectRoot, wmpfVersion);
+        configContent = JSON.stringify(config);
+        logger.info(`[frida] detected hook offsets: ${configContent}`);
+    } else {
+        try {
+            configContent = (
+                await promises.readFile(
+                    path.join(
+                        projectRoot,
+                        `frida/config/${process.platform}`,
+                        `addresses.${wmpfVersion}.json`,
+                    ),
+                )
+            ).toString();
+            configContent = JSON.stringify(JSON.parse(configContent));
+        } catch (e) {
+            throw new Error(`[frida] version config not found: ${wmpfVersion}`);
+        }
     }
 
     if (scriptContent === null || configContent === null) {

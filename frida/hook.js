@@ -60,8 +60,11 @@ const hookOnLoadScene = (a1, sceneOffsets) => {
     // 1000: from issue #83 <-- will crash the process
     // 1007: from issue #80
     // 1008: from issue #53
+    // 1011: scan QR code
+    // 1012: recognize QR code from long-pressed image (issue #128)
     // 1027: from issue #78
     // 1035: from issue #78
+    // 1037: opened from another mini program
     // 1053: from issue #25
     // 1074: from issue #32
     // 1145: from search
@@ -71,8 +74,8 @@ const hookOnLoadScene = (a1, sceneOffsets) => {
     // 1302: from services
     // 1308: minigame?
     const sceneNumberArray = [
-        1005, 1007, 1008, 1027, 1035, 1053, 1074, 1145, 1178, 1256, 1260, 1302,
-        1308,
+        1005, 1007, 1008, 1011, 1012, 1027, 1035, 1037, 1053, 1074, 1145, 1178,
+        1256, 1260, 1302, 1308,
     ];
     if (!sceneNumberArray.includes(miniappScenePtr.readInt())) {
         return;
@@ -107,33 +110,6 @@ const patchOnLoadStart = (base, config) => {
     });
 };
 
-// Hook Document/Fetch handlers to force enabled_ = 1
-// Required for 25558+: Network.enable command doesn't set enabled_ properly
-const patchEnabled = (base) => {
-    // Document handler
-    Interceptor.attach(base.add(0x13b71b0), {
-        onEnter(args) {
-            try {
-                var obj = this.context.rcx;
-                if (obj.add(0x98).readU8() != 1) {
-                    obj.add(0x98).writeU8(1);
-                }
-            } catch(e) {}
-        }
-    });
-    // Fetch handler
-    Interceptor.attach(base.add(0x7259e60), {
-        onEnter(args) {
-            try {
-                var obj = this.context.rcx;
-                if (obj.add(0x98).readU8() != 1) {
-                    obj.add(0x98).writeU8(1);
-                }
-            } catch(e) {}
-        }
-    });
-};
-
 const parseConfig = () => {
     const rawConfig = `@@CONFIG@@`;
     if (rawConfig.includes("@@")) {
@@ -152,8 +128,7 @@ const main = () => {
     const config = parseConfig();
     const mainModule = getMainModule(config.Version);
     patchOnLoadStart(mainModule.base, config);
-    patchEnabled(mainModule.base);
     patchCDPFilter(mainModule.base, config);
 };
 
-main();
+main();
