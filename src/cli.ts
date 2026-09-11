@@ -5,6 +5,7 @@ type CliOptions = {
     cdpPort: number;
     debugMain: boolean;
     debugFrida: boolean;
+    autoDetect: boolean;
 };
 
 // default debugging port, do not change
@@ -21,6 +22,7 @@ Options:
   --cdp-port <port>    CDP proxy server port (default: ${CDP_PORT})
   --debug-main         Output main process debug messages
   --debug-frida        Output Frida client messages
+  --auto-detect        Automatically detect hook offsets (Windows x64)
   -h, --help           Show this help message`);
 };
 
@@ -48,6 +50,7 @@ const parse_cli_options = (): CliOptions => {
             "cdp-port": { type: "string" },
             "debug-main": { type: "boolean" },
             "debug-frida": { type: "boolean" },
+            "auto-detect": { type: "boolean" },
             help: { type: "boolean", short: "h" },
         },
         allowPositionals: false,
@@ -63,6 +66,7 @@ const parse_cli_options = (): CliOptions => {
         cdpPort: parse_port("--cdp-port", values["cdp-port"], CDP_PORT),
         debugMain: values["debug-main"] ?? false,
         debugFrida: values["debug-frida"] ?? false,
+        autoDetect: values["auto-detect"] ?? false,
     };
 };
 
