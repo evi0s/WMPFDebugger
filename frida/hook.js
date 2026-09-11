@@ -145,6 +145,33 @@ const patchOnLoadStart = (base, config) => {
     });
 };
 
+// Hook Document/Fetch handlers to force enabled_ = 1
+// Required for 25558+: Network.enable command doesn't set enabled_ properly
+const patchEnabled = (base) => {
+    // Document handler
+    Interceptor.attach(base.add(0x13b71b0), {
+        onEnter(args) {
+            try {
+                var obj = this.context.rcx;
+                if (obj.add(0x98).readU8() != 1) {
+                    obj.add(0x98).writeU8(1);
+                }
+            } catch(e) {}
+        }
+    });
+    // Fetch handler
+    Interceptor.attach(base.add(0x7259e60), {
+        onEnter(args) {
+            try {
+                var obj = this.context.rcx;
+                if (obj.add(0x98).readU8() != 1) {
+                    obj.add(0x98).writeU8(1);
+                }
+            } catch(e) {}
+        }
+    });
+};
+
 const parseConfig = () => {
     const rawConfig = `@@CONFIG@@`;
     if (rawConfig.includes("@@")) {
@@ -163,7 +190,8 @@ const main = () => {
     const config = parseConfig();
     const mainModule = getMainModule(config.Version);
     patchOnLoadStart(mainModule.base, config);
+    patchEnabled(mainModule.base);
     patchCDPFilter(mainModule.base, config);
 };
 
-main();
+main();
