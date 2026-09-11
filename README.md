@@ -89,6 +89,7 @@ To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EX
 **Version histories:**
 
 * 14978 (latest, credit @Redbeanw44602)
+* 14910 (credit @CCLL-0x01)
 
 
 ### macOS (arm64) Support

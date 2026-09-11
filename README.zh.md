@@ -87,6 +87,7 @@
 **支持的 WMPF 版本：**
 
 * 14978 (最新, credit @Redbeanw44602)
+* 14910 (credit, @CCLL-0x01)
 
 ### macOS (arm64) 支持
 
