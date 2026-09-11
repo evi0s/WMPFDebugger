@@ -60,8 +60,11 @@ const hookOnLoadScene = (a1, sceneOffsets) => {
     // 1000: from issue #83 <-- will crash the process
     // 1007: from issue #80
     // 1008: from issue #53
+    // 1011: scan QR code
+    // 1012: recognize QR code from long-pressed image (issue #128)
     // 1027: from issue #78
     // 1035: from issue #78
+    // 1037: opened from another mini program
     // 1053: from issue #25
     // 1074: from issue #32
     // 1145: from search
@@ -71,8 +74,8 @@ const hookOnLoadScene = (a1, sceneOffsets) => {
     // 1302: from services
     // 1308: minigame?
     const sceneNumberArray = [
-        1005, 1007, 1008, 1027, 1035, 1053, 1074, 1145, 1178, 1256, 1260, 1302,
-        1308,
+        1005, 1007, 1008, 1011, 1012, 1027, 1035, 1037, 1053, 1074, 1145, 1178,
+        1256, 1260, 1302, 1308,
     ];
     if (!sceneNumberArray.includes(miniappScenePtr.readInt())) {
         return;
