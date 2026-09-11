@@ -154,7 +154,13 @@ const autoDetectConfig = async (
     let detectorContent: string;
     try {
         detectorContent = (
-            await promises.readFile(path.join(projectRoot, "frida/version-detect.js"))
+            await promises.readFile(
+                path.join(
+                    projectRoot,
+                    "frida/autodetect",
+                    `${process.platform}.js`,
+                ),
+            )
         ).toString();
     } catch (e) {
         throw new Error("[frida] auto-detect script not found");
