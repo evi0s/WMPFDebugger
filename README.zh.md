@@ -72,6 +72,7 @@
 
 </details>
 
+如何使用自动偏移检测：添加 `--auto-detect` 命令行参数。当前仅支持 Windows x86_64，且尚未测试稳定性
 
 如何调试微信内置浏览器页面：参见 [EXTENSION.md](EXTENSION.md)。注意，目前该方法仅有基础调试功能
 

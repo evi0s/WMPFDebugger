@@ -73,6 +73,8 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 </details>
 
+To use auto-detect feature (currently beta), simply add `--auto-detect` in your launch arguments
+
 To check your installed version, navigate to Task Manager -> WeChatAppEx -> Right click -> Open file location -> Check the number between `RadiumWMPF` and `extracted`.
 
 To adapt to another version, please find the instructions in [ADAPTATION.md](ADAPTATION.md). Alternatively, you can submit an issue for new version adaption and I will try that if I have the binary. Note that only newer version adaption requests will be considered.
