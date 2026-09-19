@@ -13,7 +13,7 @@
 
 * **自动检测** (Beta 测试)
 * 25715 (最新)
-* 25558 (最新, credit @potacotion, @bingkxu)
+* 25558 (credit @potacotion, @bingkxu)
 * 25510 (credit @potacotion)
 * 25459 (credit @1147529365)
 * 25364 (credit @lyratu)
