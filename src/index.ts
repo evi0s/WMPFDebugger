@@ -13,11 +13,21 @@ const messageProto = require("./third-party/WARemoteDebugProtobuf.js");
 
 class DebugMessageEmitter extends EventEmitter {}
 
+type StructOffsetConfig = {
+    LaunchConfigOffsets: number[];
+    RemoteDebugConfigOffsets: number[];
+    SceneOffset: number;
+    WebSocketURLStringOffset: number;
+    RemoteDebugModeOffset: number;
+}
+
 type HookConfig = {
     Version: number;
     LoadStartHookOffset: string;
     CDPFilterHookOffset: string;
-    SceneOffsets: number[];
+    CastToJsonHookOffset?: string;
+    SceneOffsets?: number[];
+    MiniAppConfigStructOffsets?: StructOffsetConfig;
 };
 
 const debugMessageEmitter = new DebugMessageEmitter();
