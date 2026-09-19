@@ -11,7 +11,9 @@ export class WindowsPlatform implements IPlatform {
             (process) => process.name === "WeChatAppEx.exe",
         );
         const wmpfPids = wmpfProcesses.map((p) =>
-            p.parameters.ppid ? p.parameters.ppid : 0,
+            p.parameters.ppid !== undefined
+                ? Number(p.parameters.ppid)
+                : 0,
         );
 
         // find the parent process
@@ -25,12 +27,16 @@ export class WindowsPlatform implements IPlatform {
         if (wmpfPid === undefined) {
             throw new Error("[frida] WeChatAppEx.exe process not found");
         }
-        const wmpfProcess = processes.filter(
+        const wmpfProcess = processes.find(
             (process) => process.pid === wmpfPid,
-        )[0];
-        const wmpfProcessPath = wmpfProcess.parameters.path as string | undefined;
-        const wmpfVersionMatch = wmpfProcessPath
-            ? wmpfProcessPath.match(/\d+/g)
+        );
+        if (wmpfProcess === undefined) {
+            throw new Error("[frida] wmpf browser process not found");
+        }
+        const wmpfProcessArgv = wmpfProcess.parameters.argv as Array<string>;
+        const flueRuntimeDir = wmpfProcessArgv.find(e => e.startsWith("--flue-runtime-dir"))
+        const wmpfVersionMatch = flueRuntimeDir
+            ? flueRuntimeDir.match(/\d+/g)
             : "";
         const wmpfVersion = wmpfVersionMatch
             ? Number(wmpfVersionMatch.pop())
