@@ -13,19 +13,19 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 **Version histories:**
 
-* **auto-detect** (beta, credit @GhostMice)
+* **auto-detect** (beta)
 * 25715 (latest)
 * 25558 (credit @potacotion, @bingkxu)
 * 25510 (credit @potacotion)
 * 25459 (credit @1147529365)
 * 25364 (credit @lyratu)
 * 25297 (credit @Yinuo0602, @82539474)
-* 25268 (credit @RuntimeBroker)
 
 <details>
 
 <summary>Older versions</summary>
 
+* 25268 (credit @RuntimeBroker)
 * 20089 (credit @lovejiuwu)
 * 20079 (credit @LiuYJia, @82539474)
 * 20005 (credit @LiuYJia)
