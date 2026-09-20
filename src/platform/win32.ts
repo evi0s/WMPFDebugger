@@ -34,9 +34,11 @@ export class WindowsPlatform implements IPlatform {
             throw new Error("[frida] wmpf browser process not found");
         }
         const wmpfProcessArgv = wmpfProcess.parameters.argv as Array<string>;
-        const flueRuntimeDir = wmpfProcessArgv.find(e => e.startsWith("--flue-runtime-dir"))
-        const wmpfVersionMatch = flueRuntimeDir
-            ? flueRuntimeDir.match(/\d+/g)
+        const flueRuntimeDir = wmpfProcessArgv.find(e => e.startsWith("--flue-runtime-dir"));
+        // legacy wmpf path fall back
+        const matchPath = flueRuntimeDir ? flueRuntimeDir : wmpfProcess.parameters.path as string | undefined;
+        const wmpfVersionMatch = matchPath
+            ? matchPath.match(/\d+/g)
             : "";
         const wmpfVersion = wmpfVersionMatch
             ? Number(wmpfVersionMatch.pop())
