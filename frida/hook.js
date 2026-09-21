@@ -21,19 +21,33 @@ const patchCDPFilter = (base, config) => {
     // xref: SendToClientFilter OR devtools_message_filter_applet_webview.cc
     // xref: CastToJson
     if (config.CastToJsonHookOffset) {
-        // TODO: this was tested on win32, but not on darwin nor linux
         // credit: @Redbeanw44602, pr #262
-        const castToJsonFunc = new NativeFunction(
-            base.add(config.CastToJsonHookOffset),
-            "pointer",
-            ["pointer", "pointer"]
-        );
-        const callback = new NativeCallback(function(thiz, jsonOut, cborInput) {
-            castToJsonFunc(jsonOut, cborInput);
-            return jsonOut;
-        }, "pointer", ["pointer", "pointer", "pointer"]);
-
-        Interceptor.replace(base.add(config.CDPFilterHookOffset), callback);
+        const osPlatform = getPlatform();
+        if (osPlatform === "windows" || osPlatform === "darwin") {
+            // TODO: this was not tested on darwin
+            const castToJsonFunc = new NativeFunction(
+                base.add(config.CastToJsonHookOffset),
+                "pointer",
+                ["pointer", "pointer"]
+            );
+            const callback = new NativeCallback(function(thiz, jsonOut, cborInput) {
+                castToJsonFunc(jsonOut, cborInput);
+                return jsonOut;
+            }, "pointer", ["pointer", "pointer", "pointer"]);
+            Interceptor.replace(base.add(config.CDPFilterHookOffset), callback);
+        }
+        if (osPlatform === "linux") {
+            const castToJsonFunc = new NativeFunction(
+                base.add(config.CastToJsonHookOffset),
+                "pointer",
+                ["pointer", "pointer", "pointer"]
+            );
+            const callback = new NativeCallback(function (jsonOut, thiz, cborInput, cborLen) {
+                castToJsonFunc(jsonOut, cborInput, cborLen)
+                return jsonOut
+            }, "pointer", ["pointer", "pointer", "pointer", "pointer"]);
+            Interceptor.replace(base.add(config.CDPFilterHookOffset), callback);
+        }
         return;
     }
 
