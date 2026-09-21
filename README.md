@@ -15,16 +15,17 @@ This debugger (tweak) exploits Remote Debug feature provided by wechatdevtools a
 
 * **auto-detect** (beta)
 * 25715 (latest)
+* 25710 (credit @sundaqiang)
 * 25558 (credit @potacotion, @bingkxu)
 * 25510 (credit @potacotion)
 * 25459 (credit @1147529365)
 * 25364 (credit @lyratu)
-* 25297 (credit @Yinuo0602, @82539474)
 
 <details>
 
 <summary>Older versions</summary>
 
+* 25297 (credit @Yinuo0602, @82539474)
 * 25268 (credit @RuntimeBroker)
 * 20089 (credit @lovejiuwu)
 * 20079 (credit @LiuYJia, @82539474)
@@ -92,7 +93,8 @@ To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EX
 
 **Version histories:**
 
-* 14978 (latest, credit @Redbeanw44602)
+* 25665 (latest, credit @Redbeanw44602)
+* 14978 (credit @Redbeanw44602)
 * 14910 (credit @CCLL-0x01)
 
 
