@@ -546,13 +546,29 @@ const recoverRemoteGuard = (instructions, name) => {
 
     const candidates = [];
     for (const scene of comparisons.filter((item) => item.immediate === 1101)) {
-        for (const mode of comparisons.filter(
+        const sameSource = comparisons.filter(
             (item) => item.immediate === 1 && item.baseKey === scene.baseKey,
-        )) {
+        );
+        for (const mode of sameSource) {
             candidates.push({
                 rootOffsets: scene.rootOffsets,
                 sceneOffset: scene.fieldOffset,
                 modeOffset: mode.fieldOffset,
+            });
+        }
+
+        // Some legacy builds read the remote-debug flag straight off the first
+        // argument (e.g. `cmp byte ptr [rsi + 0x29], 1` after `mov rsi, rcx`)
+        // instead of storing it next to the scene value. There the mode field
+        // has no shared base with the scene field, so `baseKey` never matches.
+        // Legacy detection only needs the scene side (SceneOffsets is built
+        // from rootOffsets + sceneOffset), so fall back to an unpaired scene
+        // candidate rather than rejecting the build outright.
+        if (sameSource.length === 0) {
+            candidates.push({
+                rootOffsets: scene.rootOffsets,
+                sceneOffset: scene.fieldOffset,
+                modeOffset: null,
             });
         }
     }
@@ -758,6 +774,12 @@ const detectModern = (module, functions, xrefs, loadStart) => {
         loadGuard.modeOffset !== startGuard.modeOffset
     ) {
         throw new Error("OnLoadStart and Start remote-debug fields disagree");
+    }
+    // Modern builds always expose a paired mode field; a null here means the
+    // unpaired-scene fallback was taken, which is only valid for legacy
+    // detection. Refuse rather than emit a config with a null offset.
+    if (startGuard.modeOffset === null) {
+        throw new Error("modern WMPF layout is missing the remote-debug mode field");
     }
 
     const launchExpression = loadExpression(argumentExpression(0), startGuard.rootOffsets[0]);
