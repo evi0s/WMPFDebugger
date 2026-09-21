@@ -84,7 +84,7 @@ const handleOnLoadStart = (a1, config) => {
             .add(structOffsets[4])
             .readPointer();
 
-        miniappScenePtr = remoteDebugParametersPtr.add(structOffsets[5]);
+        miniappScenePtr = remoteDebugConfigPtr.add(structOffsets[5]);
     } else {
         // later wmpf builds (win32)
         const launchConfigOffsets = structOffsets.LaunchConfigOffsets;

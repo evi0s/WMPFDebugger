@@ -34,7 +34,7 @@ Analyze `WeChatAppEx` using IDA.
 
 ## LoadStartHookOffset
 
-### Windows (>=18891)
+### Linux (>=25665), Windows (>=18891)
 
 Please search `OnLoadStart` (camel-case) and find the x-ref function that references a string contains `applet_index_container.cc`. Possibly `sub_18xxxxxxx+E6`
 
@@ -113,7 +113,7 @@ Based on the pattern of the first argument passed to `sub_182B02350`, the `resul
 "SceneOffsets": [56, 1376, 8, 1312, 16, 456]
 ```
 
-### Linux, Windows (>=14199, Old Version)
+### Linux (>=14910), Windows (>=14199) [Old Version]
 
 Locate the `AppletIndexContainer::OnLoadStart` function by searching `[Perf] AppletIndexContainer::OnLoadStart`
 in strings.
