@@ -71,20 +71,23 @@ const handleOnLoadStart = (a1, config) => {
 
     // legacy scene config
     if (config.SceneOffsets) {
+        // Legacy configs describe a single 6-hop scene chain. Keep it in one
+        // pass: re-splitting it like the modern path inserts an extra
+        // dereference after offset[2] and lands on the wrong struct.
         miniappLaunchConfigPtr = a1
             .add(structOffsets[0])
             .readPointer()
             .add(structOffsets[1])
-            .readPointer()
-            .add(structOffsets[2])
             .readPointer();
-        remoteDebugConfigPtr = miniappLaunchConfigPtr
+        miniappScenePtr = miniappLaunchConfigPtr
+            .add(structOffsets[2])
+            .readPointer()
             .add(structOffsets[3])
             .readPointer()
             .add(structOffsets[4])
-            .readPointer();
-
-        miniappScenePtr = remoteDebugParametersPtr.add(structOffsets[5]);
+            .readPointer()
+            .add(structOffsets[5]);
+        remoteDebugConfigPtr = miniappLaunchConfigPtr;
     } else {
         // later wmpf builds (win32)
         const launchConfigOffsets = structOffsets.LaunchConfigOffsets;
@@ -134,7 +137,9 @@ const handleOnLoadStart = (a1, config) => {
     miniappScenePtr.writeInt(1101);
 
     if (config.SceneOffsets) {
-        // legacy path, we are done here
+        // Legacy path: debug mode is enabled by the args[1] |= 0x1 write in
+        // patchOnLoadStart. There is no websocket-URL / remote-debug-mode field
+        // to patch on these builds, so we are done here.
         return;
     }
 
