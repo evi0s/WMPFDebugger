@@ -135,15 +135,19 @@ const handleOnLoadStart = (a1, config) => {
     // 1260: from frequently used
     // 1302: from services
     // 1308: minigame?
+    // 1183: from the mini program panel, opening a search result card (Linux, WeChat 4.1.13.23)
     const sceneNumberArray = [
         1005, 1007, 1008, 1011, 1012, 1027, 1035, 1037, 1053, 1074, 1145, 1178,
-        1256, 1260, 1302, 1308,
+        1256, 1260, 1302, 1308, 1183,
     ];
-    if (!sceneNumberArray.includes(miniappScenePtr.readInt())) {
+    const sceneNumber = miniappScenePtr.readInt();
+    if (!sceneNumberArray.includes(sceneNumber)) {
+        // Not whitelisted: report the scene number so it can be added when a new entry point appears.
+        send(`[hook] scene NOT in whitelist: ${sceneNumber}`);
         return;
     }
 
-    send(`[hook] scene: ${miniappScenePtr.readInt()}`);
+    send(`[hook] scene: ${sceneNumber}`);
     send("[hook] hook scene condition -> 1101");
     miniappScenePtr.writeInt(1101);
 
