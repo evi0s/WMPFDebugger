@@ -18,6 +18,14 @@ function searchWmpfVersionInFile(filePath: string): number {
     return 0;
 }
 
+function findReadableProcessPath(pid: number, processPath: string): string | undefined {
+    if (fs.existsSync(processPath)) return processPath;
+
+    // Flatpak exposes the executable inside the process mount namespace.
+    const sandboxPath = `/proc/${pid}/root${processPath}`;
+    return fs.existsSync(sandboxPath) ? sandboxPath : undefined;
+}
+
 export class LinuxPlatform implements IPlatform {
     async findWmpfProcess(): Promise<WmpfProcessInfo> {
         const localDevice = await frida.getLocalDevice();
@@ -37,8 +45,11 @@ export class LinuxPlatform implements IPlatform {
         }
 
         const wmpfProcessPath = rootWmpf.parameters.path as string | undefined;
-        const wmpfVersion = wmpfProcessPath
-            ? searchWmpfVersionInFile(wmpfProcessPath)
+        const readableProcessPath = wmpfProcessPath
+            ? findReadableProcessPath(rootWmpf.pid, wmpfProcessPath)
+            : undefined;
+        const wmpfVersion = readableProcessPath
+            ? searchWmpfVersionInFile(readableProcessPath)
             : 0;
         if (wmpfVersion === 0) {
             throw new Error("[frida] error in find wmpf version");
