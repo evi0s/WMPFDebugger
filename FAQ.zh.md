@@ -85,7 +85,7 @@ yarn
 小程序闪退可能有以下原因：
 
 1. **WebSocket 帧错误**（`Invalid WebSocket frame: invalid opcode 0`）：不要使用全局代理 (例如 `yakit`, Issue #119)
-2. **操作顺序错误**：必须先运行 `npx ts-node src/index.ts`，然后打开小程序，最后打开开发者工具。顺序不对可能导致闪退
+2. **操作顺序错误**：必须先运行 `npx tsx src/index.ts`，然后打开小程序，最后打开开发者工具。顺序不对可能导致闪退
 3. **版本不匹配**：确保你的 WMPF 版本在支持列表中
 
 **解决方案：**
