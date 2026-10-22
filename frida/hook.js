@@ -23,8 +23,7 @@ const patchCDPFilter = (base, config) => {
     if (config.CastToJsonHookOffset) {
         // credit: @Redbeanw44602, pr #262
         const osPlatform = getPlatform();
-        if (osPlatform === "windows" || osPlatform === "darwin") {
-            // TODO: this was not tested on darwin
+        if (osPlatform === "windows") {
             const castToJsonFunc = new NativeFunction(
                 base.add(config.CastToJsonHookOffset),
                 "pointer",
@@ -35,6 +34,38 @@ const patchCDPFilter = (base, config) => {
                 return jsonOut;
             }, "pointer", ["pointer", "pointer", "pointer"]);
             Interceptor.replace(base.add(config.CDPFilterHookOffset), callback);
+        }
+        if (osPlatform === "darwin") {
+            // On darwin (e.g. WMPF 7.25755 / XWEB 25755, arm64), the ABIs differ from win32:
+            //   SendToClientFilter(CDPFilterHookOffset): x0 = cbor bytes ptr, x1 = cbor length (int),
+            //                                            x8 = jsonOut (std::string return slot).
+            //   CastToJsonHookOffset points at the RAW cbor->json converter, not the CastToJson wrapper:
+            //     converter(x0 = cbor bytes ptr, x1 = cbor length, x2 = jsonOut std::string).
+            // (Replacing the filter with the CastToJson wrapper directly crashes: it expects
+            //  x1 = std::string but the filter supplies x1 = integer length -> deref of the length.)
+            // So we attach, capture (x0, x1, x8) on enter, then on leave zero the emptied "{}" jsonOut
+            // and re-fill it by calling the converter with x8 routed into x2.
+            const convert = new NativeFunction(
+                base.add(config.CastToJsonHookOffset),
+                "pointer",
+                ["pointer", "pointer", "pointer"]
+            );
+            Interceptor.attach(base.add(config.CDPFilterHookOffset), {
+                onEnter(args) {
+                    this.cborPtr = this.context.x0;
+                    this.cborLen = this.context.x1;
+                    this.jsonOut = this.context.x8;
+                },
+                onLeave(retval) {
+                    const out = this.jsonOut;
+                    if (!out || out.isNull()) return;
+                    // zero the (emptied) std::string [ptr, len, cap] before the converter re-fills it
+                    out.writeU64(0);
+                    out.add(8).writeU64(0);
+                    out.add(16).writeU64(0);
+                    convert(this.cborPtr, this.cborLen, out);
+                },
+            });
         }
         if (osPlatform === "linux") {
             const castToJsonFunc = new NativeFunction(
@@ -155,7 +186,13 @@ const handleOnLoadStart = (a1, config) => {
     // setup the websocket back connection URL for new flue builds
     // it's now adjustable as well :)
     const websocketUrl = "ws://localhost:9421";
-    const websocketUrlStringPtr = miniappLaunchConfigPtr
+    // On win32/linux the URL std::string lives in the LaunchConfig struct; on darwin (WMPF 7.25755)
+    // it lives in the RemoteDebugConfig struct (WebSocketURLStringOffset is rc-relative there),
+    // alongside scene and RemoteDebugMode.
+    const websocketUrlBasePtr = getPlatform() === "darwin"
+            ? remoteDebugConfigPtr
+            : miniappLaunchConfigPtr;
+    const websocketUrlStringPtr = websocketUrlBasePtr
             .add(structOffsets.WebSocketURLStringOffset);
     const stringMarker = websocketUrlStringPtr.add(23).readS8();
     if (stringMarker < 0) {
