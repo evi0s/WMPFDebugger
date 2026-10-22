@@ -132,7 +132,7 @@ yarn
 **Step 2.** Run `src/index.ts` to launch debug server and proxy server, and inject hook script to miniapp runtime.
 
 ```bash
-npx ts-node src/index.ts
+npx tsx src/index.ts
 ```
 
 > Note: After this step, you need to launch the miniapp BEFORE launching the devtools, otherwise you will probably need to kill the server and redo the steps 2 to 4 again.
