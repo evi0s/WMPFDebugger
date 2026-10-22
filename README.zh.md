@@ -90,7 +90,8 @@
 
 **支持的 WMPF 版本：**
 
-* 25665 (最新, credit @Redbeanw44602)
+* 25806 (最新, credit @Redbeanw44602)
+* 25665 (credit @Redbeanw44602)
 * 14978 (credit @Redbeanw44602)
 * 14910 (credit, @CCLL-0x01)
 

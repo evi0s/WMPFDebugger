@@ -93,7 +93,8 @@ To debug web pages of WeChat embedded browser, please refer to [EXTENSION.md](EX
 
 **Version histories:**
 
-* 25665 (latest, credit @Redbeanw44602)
+* 25806 (latest, credit @Redbeanw44602)
+* 25665 (credit @Redbeanw44602)
 * 14978 (credit @Redbeanw44602)
 * 14910 (credit @CCLL-0x01)
 
