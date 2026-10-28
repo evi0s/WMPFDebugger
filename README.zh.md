@@ -12,7 +12,8 @@
 **支持的 WMPF 版本：**
 
 * **自动检测** (Beta 测试)
-* 25715 (最新)
+* 25819 (最新, credit @potacotion)
+* 25715
 * 25710 (credit @sundaqiang)
 * 25558 (credit @potacotion, @bingkxu)
 * 25510 (credit @potacotion)
